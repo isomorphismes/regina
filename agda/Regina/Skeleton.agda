@@ -75,20 +75,21 @@ all_boolean_vectors (suc element_count) =
   map (λ tail → vector_cons false tail) (all_boolean_vectors element_count) ++
   map (λ tail → vector_cons true tail) (all_boolean_vectors element_count)
 
-faceMasks : (dimension face_dimension : Nat) →
-  List (Vector Bool (suc dimension))
-faceMasks dimension face_dimension with less_than face_dimension dimension
+faceMasks : (simplex_dimension requested_face_dimension : Nat) →
+  List (Vector Bool (suc simplex_dimension))
+faceMasks simplex_dimension requested_face_dimension
+  with less_than requested_face_dimension simplex_dimension
 ... | false = []
 ... | true = filter_list
-  (λ mask → nat_equal (true_count mask) (suc face_dimension))
-  (all_boolean_vectors (suc dimension))
+  (λ mask → nat_equal (true_count mask) (suc requested_face_dimension))
+  (all_boolean_vectors (suc simplex_dimension))
 
-local_faces : (dimension simplex_count face_dimension : Nat) →
-  List (LocalFace dimension simplex_count)
-local_faces dimension simplex_count face_dimension = concat_map
+local_faces : (simplex_dimension number_of_simplices requested_face_dimension : Nat) →
+  List (LocalFace simplex_dimension number_of_simplices)
+local_faces simplex_dimension number_of_simplices requested_face_dimension = concat_map
   (λ simplex_index → map (local_face simplex_index)
-    (faceMasks dimension face_dimension))
-  (all_fin simplex_count)
+    (faceMasks simplex_dimension requested_face_dimension))
+  (all_fin number_of_simplices)
 
 local_face_equal : LocalFace dimension simplex_count →
   LocalFace dimension simplex_count → Bool
