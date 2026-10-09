@@ -81,10 +81,10 @@ sphere_three_is_one_closed_orientable_component :
     accepted (component_summary 1 (2 ∷ []) (0 ∷ []) (true ∷ []) true)
 sphere_three_is_one_closed_orientable_component = refl
 
-ball_bundle_is_one_orientable_component_with_two_boundary_facets :
+ball_bundle_is_one_orientable_component_and_has_two_boundary_facets :
   map_outcome componentSummary three_dimensional_ball_bundle ≡
     accepted (component_summary 1 (1 ∷ []) (2 ∷ []) (true ∷ []) true)
-ball_bundle_is_one_orientable_component_with_two_boundary_facets = refl
+ball_bundle_is_one_orientable_component_and_has_two_boundary_facets = refl
 
 figure_eight_is_one_orientable_component :
   map_outcome componentSummary figure_eight_knot_complement ≡
