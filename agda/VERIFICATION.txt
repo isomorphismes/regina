@@ -1,0 +1,56 @@
+REGINA AGDA TRANSLATION — VERIFICATION
+
+Checked at: 2026-10-09 21:42:15 UTC
+Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
+Source repository: https://github.com/regina-normal/regina
+Delivery repository: https://github.com/isomorphisms/regina
+Branch: Agda
+Target: disposable Ubuntu 24.04 amd64 environment
+Compiler: Agda 2.6.3, Ubuntu package 2.6.3-1build1
+Compiler executable SHA-256: 852806142a15951f667df303c73cfce5f4123218ce6e1f1b29acaddc242af00d
+
+Aggregate check: PASS
+Exit code: 0
+Local Agda modules checked: 8
+Concrete reduction assertions: 64
+  Regina.PermutationTests: 16
+  Regina.TriangulationTests: 48
+
+Reproduction command, with the repository root as working directory:
+agda --safe --without-K --ignore-interfaces --no-libraries --no-default-libraries -i agda agda/Regina/All.agda
+
+The recorded run used absolute paths and relocated Agda builtin data.
+No Agda standard library or user-installed library was loaded.
+The compiler checked the complete aggregate, including all test equalities,
+with fresh interfaces. Computation was exercised by Agda reduction.
+This receipt does not claim a compiled GHC executable, a Regina C++ differential
+run, manifold recognition, or translation of the rest of Regina.
+
+Compiler provenance:
+The compiler and builtin modules came from the configured Ubuntu Noble
+snapshot. Its release signature was checked against the Ubuntu archive keyring;
+the package index and downloaded package SHA-256 values were verified.
+agda-bin_2.6.3-1build1_amd64.deb:
+17d3b7d5453e8a199db789bf9b199b5635e485db93864e454aa6832a03ba5902
+libghc-agda-dev_2.6.3-1build1_amd64.deb:
+84c8810cb45493aa26b6838928b0aec5a233d7e9ae4a0830b63cb85efc3d0388
+
+Checked input SHA-256 values:
+7de1c055df3c431f63c1feb9b286116e175a4b656ce1e02c3f73951dfadf6c0b  agda/Regina/All.agda
+d3058212ee29202a3c57cee9b72b92a21b8aa1eaf41bc6803b989983ae008567  agda/Regina/Examples.agda
+0127e22fd02e3e25ea69394142d00d2f46e32b93f436a823698eb5357ca81c15  agda/Regina/Foundation.agda
+93bc6c66e5d97a6437f7d24698d8e4d50eadb2bf5cdc66f1497ed3e486187415  agda/Regina/Input.agda
+a36e52c63834b1acdfc7948f7603b0209fb6bfe4c31b0e31c71ed94f83395c07  agda/Regina/Permutation.agda
+dd1abfcca844d568ba3ea6e48d4ff42a1ca51020b20e4d44375361f7c4074cc3  agda/Regina/PermutationTests.agda
+87ed136e6196d2eae459bd7c40d42320db84df769ca807bf925d07b1c34df6e5  agda/Regina/Triangulation.agda
+bbb59aec52332471169d08f8c56efa7613cc97f2362110b2ac395fce72020bec  agda/Regina/TriangulationTests.agda
+
+Compiler output (repository paths normalized):
+Checking Regina.All (agda/Regina/All.agda).
+ Checking Regina.Foundation (agda/Regina/Foundation.agda).
+ Checking Regina.Permutation (agda/Regina/Permutation.agda).
+ Checking Regina.Triangulation (agda/Regina/Triangulation.agda).
+ Checking Regina.Input (agda/Regina/Input.agda).
+ Checking Regina.Examples (agda/Regina/Examples.agda).
+ Checking Regina.PermutationTests (agda/Regina/PermutationTests.agda).
+ Checking Regina.TriangulationTests (agda/Regina/TriangulationTests.agda).
