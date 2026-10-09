@@ -119,8 +119,9 @@ partitionSimplexComponents (suc fuel) current universe (seed ∷ remaining)
 
 simplexComponents : Triangulation dimension simplex_count →
   List (List (Fin simplex_count))
-simplexComponents {simplex_count} current with all_fin simplex_count
-... | universe = partitionSimplexComponents (length universe) current universe universe
+simplexComponents {simplex_count = numberOfSimplices} current =
+  partitionSimplexComponents numberOfSimplices current
+    (all_fin numberOfSimplices) (all_fin numberOfSimplices)
 
 componentCount : Triangulation dimension simplex_count → Nat
 componentCount current = length (simplexComponents current)
@@ -240,10 +241,10 @@ expandOrientedReachable (suc fuel) current universe reached =
 
 reachableOrientationsFrom : Triangulation dimension simplex_count →
   Fin simplex_count → List (OrientedSimplex simplex_count)
-reachableOrientationsFrom {simplex_count} current root with
-  allOrientedSimplices simplex_count
-... | universe = expandOrientedReachable (length universe) current universe
-  (orientedSimplex root positive ∷ [])
+reachableOrientationsFrom {simplex_count = numberOfSimplices} current root =
+  expandOrientedReachable (numberOfSimplices + numberOfSimplices) current
+    (allOrientedSimplices numberOfSimplices)
+    (orientedSimplex root positive ∷ [])
 
 hasBothOrientations : List (OrientedSimplex simplex_count) →
   Fin simplex_count → Bool
