@@ -1,19 +1,20 @@
 REGINA AGDA TRANSLATION — AGGREGATE VERIFICATION
 
-Checked at: 2026-10-09 23:46:13 UTC
+Checked at: 2026-10-09 23:54:46 UTC
 Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
-Verified code commit: 51e8f09c19c19b02b0f6c94b2b706913864810a5
+Verified code commit: 6da52df8ee4e322f4d47b0de327f58e22f3812b5
 Branch: Agda
-Workflow run: https://github.com/isomorphisms/regina/actions/runs/38006081069
+Workflow run: https://github.com/isomorphisms/regina/actions/runs/38006646143
 Target: GitHub-hosted Ubuntu 24.04 amd64
 Compiler: Agda 2.6.3
 
 Aggregate check: PASS
 Exit code: 0
-Local Agda modules checked: 10
-Concrete reduction assertions: 79
+Local Agda modules checked: 12
+Concrete reduction assertions: 88
   Regina.PermutationTests: 16
   Regina.TriangulationTests: 48
+  Regina.ComponentTests: 9
   Regina.SkeletonTests: 15
 
 Command:
@@ -25,5 +26,6 @@ Computation was exercised by Agda reduction.
 
 This receipt establishes type-checking and the stated finite computations. It
 does not claim a compiled GHC executable, C++ differential testing, complete
-Regina API coverage, manifold recognition, link construction, normal-surface
-algorithms, or equivalence of performance characteristics.
+Regina API coverage, manifold recognition, link construction, real boundary
+components, dual-forest construction, normal-surface algorithms, or equivalence
+of performance characteristics.

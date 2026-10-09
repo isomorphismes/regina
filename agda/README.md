@@ -14,10 +14,12 @@ Source baseline:
 | [`Regina.Triangulation`](Regina/Triangulation.agda) | Dimension-indexed simplices, facet gluings, locks, join, unjoin, isolate, and certified reciprocal pairings. |
 | [`Regina.Input`](Regina/Input.agda) | Checked natural-number indices and permutation tables, applied in Regina's failure order. |
 | [`Regina.Examples`](Regina/Examples.agda) | Regina's ball, sphere, ball-bundle, and figure-eight constructions. |
+| [`Regina.Components`](Regina/Components.agda) | Connected simplex components, component sizes, boundary-facet counts, permutation parity, and orientability. |
 | [`Regina.Skeleton`](Regina/Skeleton.agda) | The transitive quotient of local vertices, edges, and higher proper faces under facet gluings. |
 | [`Regina.All`](Regina/All.agda) | Aggregate checker for implementation and reduction tests. |
 
 `SOURCE-MAP.tsv` maps the first slice to Regina's C++ source.
+`COMPONENTS-SOURCE-MAP.tsv` maps component and orientation propagation.
 `SKELETON-SOURCE-MAP.tsv` maps the lower-dimensional face quotient.
 
 ## Gluings
@@ -36,6 +38,28 @@ Every accepted `Triangulation` carries a `PairingsConsistent` proof. For each
 paired facet, the checker establishes that the other side returns to the source
 simplex, uses the full inverse vertex map, names a different facet, and carries
 the same facet lock.
+
+## Components and orientability
+
+Top-dimensional simplices form a finite adjacency graph through paired facets.
+Finite closure partitions them into connected components in increasing root
+index. The translation reports component sizes and counts all unpaired facets
+incident to each component.
+
+Regina propagates signs from the smallest-index simplex of a component: an even
+facet permutation reverses the neighboring simplex orientation, while an odd
+permutation preserves it. `Regina.Components` expresses the same rule as
+reachability in a doubled graph whose vertices are `(simplex, orientation)`.
+A component is nonorientable exactly when one simplex is reachable with both
+signs. Permutation parity is computed from inversion parity of the complete
+image table.
+
+The tests include a one-tetrahedron self-pairing whose even gluing returns with
+the opposite sign; it is rejected as orientable by computation. Regina's
+sphere, 3D ball-bundle, and figure-eight examples compute as orientable.
+
+A boundary-facet count is combinatorial. It is not a count of Regina's real or
+ideal boundary components.
 
 ## Lower-dimensional faces
 
@@ -65,9 +89,11 @@ that the triangulation is a manifold.
 
 ## What remains outside this translation
 
-The current skeleton slice does not reproduce Regina's embedding order,
-canonical face numbering, component orientation, links, link orientability,
-bad self-identification detection, real boundary components, or `isValid()`.
+The current skeleton work does not reproduce Regina's dual spanning forest,
+canonical stored simplex orientations, embedding order, canonical local face
+numbers, links, link orientability, bad self-identification detection, real
+boundary components, or `isValid()`.
+
 It also omits normal surfaces and hypersurfaces, homology, fundamental groups,
 Pachner moves, recognition, isomorphism signatures, geometry, GUI code, and
 native bindings.
@@ -84,11 +110,12 @@ Target: Agda 2.6.3, builtins only.
 agda --safe --without-K --ignore-interfaces --no-libraries --no-default-libraries -i agda agda/Regina/All.agda
 ```
 
-The aggregate currently checks 10 local modules and 79 concrete reduction
+The aggregate currently checks 12 local modules and 88 concrete reduction
 assertions:
 
 - `Regina.PermutationTests`: 16
 - `Regina.TriangulationTests`: 48
+- `Regina.ComponentTests`: 9
 - `Regina.SkeletonTests`: 15
 
 See [`VERIFICATION.txt`](VERIFICATION.txt) and the branch workflow for the
@@ -97,10 +124,11 @@ recorded run.
 ## Attribution and license
 
 Thank you to **Benjamin A. Burton**—credited as **Ben Burton** in the translated
-source headers—for Regina and the translated permutation, triangulation, and
-skeleton implementations. Thank you to **Ryan Budney** and **William
-Pettersson** for their work on Regina. Thank you to **Richard Rannard** for the
-figure-eight construction credited by Regina to chapter 8 of his PhD thesis.
+source headers—for Regina and the translated permutation, triangulation,
+component, orientation, and skeleton implementations. Thank you to **Ryan
+Budney** and **William Pettersson** for their work on Regina. Thank you to
+**Richard Rannard** for the figure-eight construction credited by Regina to
+chapter 8 of his PhD thesis.
 
 These acknowledgments do not replace Regina's full contributor and citation
 records. The translated material follows the repository's existing
