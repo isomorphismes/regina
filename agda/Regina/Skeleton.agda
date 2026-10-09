@@ -184,12 +184,10 @@ partition_local_faces : Nat → Triangulation dimension simplex_count →
   List (List (LocalFace dimension simplex_count))
 partition_local_faces zero current universe remaining = []
 partition_local_faces (suc fuel) current universe [] = []
-partition_local_faces (suc fuel) current universe (seed ∷ remaining) =
-  component ∷ partition_local_faces fuel current universe
-    (remove_local_faces component remaining)
-  where
-  component : List (LocalFace dimension simplex_count)
-  component = face_class_of current universe seed
+partition_local_faces (suc fuel) current universe (seed ∷ remaining)
+  with face_class_of current universe seed
+... | component = component ∷ partition_local_faces fuel current universe
+  (remove_local_faces component remaining)
 
 -- This is the transitive quotient of all local k-faces under the supplied
 -- facet gluings.  It translates Regina's face-discovery result, not its
