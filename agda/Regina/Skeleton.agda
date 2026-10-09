@@ -39,11 +39,11 @@ concat_map : {source target : Set} →
 concat_map function [] = []
 concat_map function (head ∷ tail) = function head ++ concat_map function tail
 
-count_where : {element : Set} → (element → Bool) → List element → Nat
-count_where predicate [] = zero
-count_where predicate (head ∷ tail) with predicate head
-... | true = suc (count_where predicate tail)
-... | false = count_where predicate tail
+count_matching : {element : Set} → (element → Bool) → List element → Nat
+count_matching predicate [] = zero
+count_matching predicate (head ∷ tail) with predicate head
+... | true = suc (count_matching predicate tail)
+... | false = count_matching predicate tail
 
 less_than : Nat → Nat → Bool
 less_than zero zero = false
@@ -208,7 +208,7 @@ face_class_degrees current face_dimension =
   map length (face_classes current face_dimension)
 
 face_classes_of_degree : Triangulation dimension simplex_count → Nat → Nat → Nat
-face_classes_of_degree current face_dimension requested_degree = count_where
+face_classes_of_degree current face_dimension requested_degree = count_matching
   (λ component → nat_equal (length component) requested_degree)
   (face_classes current face_dimension)
 
