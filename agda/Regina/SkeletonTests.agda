@@ -23,15 +23,15 @@ private
       degree_six : Nat
       degree_eight : Nat
 
-  profile : {dimension simplex_count : Nat} →
-    Triangulation dimension simplex_count → Nat → DegreeProfile
-  profile current face_dimension = degree_profile
-    (face_classes_of_degree current face_dimension 1)
-    (face_classes_of_degree current face_dimension 2)
-    (face_classes_of_degree current face_dimension 3)
-    (face_classes_of_degree current face_dimension 4)
-    (face_classes_of_degree current face_dimension 6)
-    (face_classes_of_degree current face_dimension 8)
+  profile : {simplex_dimension number_of_simplices : Nat} →
+    Triangulation simplex_dimension number_of_simplices → Nat → DegreeProfile
+  profile current requested_face_dimension = degree_profile
+    (face_classes_of_degree current requested_face_dimension 1)
+    (face_classes_of_degree current requested_face_dimension 2)
+    (face_classes_of_degree current requested_face_dimension 3)
+    (face_classes_of_degree current requested_face_dimension 4)
+    (face_classes_of_degree current requested_face_dimension 6)
+    (face_classes_of_degree current requested_face_dimension 8)
 
 ball_three_skeleton_counts : skeleton_face_counts (ball 3) ≡
   (4 ∷ 6 ∷ 4 ∷ [])
