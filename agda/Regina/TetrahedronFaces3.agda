@@ -71,14 +71,16 @@ referenceAfterOccurrence faceDimension (just indexedOccurrence) =
         (Embeddings.ordered_simplex_vertices
           (Subfaces.occurrence_embedding indexedOccurrence))))
 
-referenceFromSelectedVertices : Triangulation 3 simplex_count → Nat →
-  Fin simplex_count → List (Fin 4) → Maybe TetrahedronFaceReference3
-referenceFromSelectedVertices currentTriangulation faceDimension
-  simplexIndex selectedVertices = referenceAfterOccurrence faceDimension
-  (Subfaces.findOccurrence targetFace
-    (faceLinkClasses currentTriangulation faceDimension))
+referenceFromSelectedVertices : {numberOfSimplices : Nat} →
+  Triangulation 3 numberOfSimplices → Nat →
+  Fin numberOfSimplices → List (Fin 4) → Maybe TetrahedronFaceReference3
+referenceFromSelectedVertices {numberOfSimplices} currentTriangulation
+  faceDimension simplexIndex selectedVertices =
+  referenceAfterOccurrence faceDimension
+    (Subfaces.findOccurrence targetFace
+      (faceLinkClasses currentTriangulation faceDimension))
   where
-  targetFace : LocalFace 3 simplex_count
+  targetFace : LocalFace 3 numberOfSimplices
   targetFace = Subfaces.localFaceFromVertices simplexIndex selectedVertices
 
 referenceAfterInputs : Triangulation 3 simplex_count → Nat →
