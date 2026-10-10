@@ -20,14 +20,11 @@ private
   variable
     simplex_count : Nat
 
--- A small signed integer representation is sufficient for Euler
--- characteristics and avoids adding a library dependency.
 data SignedInteger : Set where
   signed_zero : SignedInteger
   signed_positive : Nat → SignedInteger
   signed_negative : Nat → SignedInteger
 
--- signed_positive n represents +(n+1); signed_negative n represents -(n+1).
 naturalDifference : Nat → Nat → SignedInteger
 naturalDifference zero zero = signed_zero
 naturalDifference (suc positiveRemainder) zero =
@@ -227,6 +224,13 @@ edgeContributionFromEndpoints requestedVertexClass contribution
     (contributionForClassIndex requestedVertexClass
       (second_endpoint_class endpointClasses) contribution)
 
+edgeContributionWeight : Triangulation 3 simplex_count →
+  FaceLinkClass 3 simplex_count → Nat
+edgeContributionWeight currentTriangulation currentEdgeClass
+  with faceLinkClassTouchesBoundary currentTriangulation currentEdgeClass
+... | true = 1
+... | false = 2
+
 edgeContributionToVertex : Triangulation 3 simplex_count →
   List (FaceLinkClass 3 simplex_count) → Nat →
   FaceLinkClass 3 simplex_count → Nat
@@ -236,12 +240,7 @@ edgeContributionToVertex currentTriangulation vertexClasses
 ... | nothing = zero
 ... | just endpointClasses = edgeContributionFromEndpoints
   requestedVertexClass
-  (naturalWhen
-    (faceLinkClassTouchesBoundary currentTriangulation currentEdgeClass)
-    1 +
-   naturalWhen
-    (not (faceLinkClassTouchesBoundary currentTriangulation currentEdgeClass))
-    2)
+  (edgeContributionWeight currentTriangulation currentEdgeClass)
   (not (face_has_bad_identification currentEdgeClass))
   endpointClasses
 
@@ -343,14 +342,15 @@ buildVertexLinkSummaries currentTriangulation allVertexClasses edgeClasses
 
 threeDimensionalVertexLinkSummaries : Triangulation 3 simplex_count →
   List VertexLinkSummary
-threeDimensionalVertexLinkSummaries currentTriangulation =
+threeDimensionalVertexLinkSummaries
+  {simplex_count = numberOfSimplices} currentTriangulation =
   buildVertexLinkSummaries currentTriangulation vertexClasses edgeClasses
     zero vertexClasses
   where
-  vertexClasses : List (FaceLinkClass 3 simplex_count)
+  vertexClasses : List (FaceLinkClass 3 numberOfSimplices)
   vertexClasses = faceLinkClasses currentTriangulation 0
 
-  edgeClasses : List (FaceLinkClass 3 simplex_count)
+  edgeClasses : List (FaceLinkClass 3 numberOfSimplices)
   edgeClasses = faceLinkClasses currentTriangulation 1
 
 summaryIsInvalid : VertexLinkSummary → Bool
@@ -402,11 +402,6 @@ threeDimensionalHasBadIdentification currentTriangulation =
   hasBadIdentification currentTriangulation 1 or
   hasBadIdentification currentTriangulation 2
 
--- This reproduces the translated local combinatorial checks used here:
--- reciprocal facet data is already certified by Triangulation; lower-face
--- self-identifications and invalid real-boundary vertex Euler data fail.
--- It is deliberately not named isValid(), since Regina's complete contract
--- also includes machinery that this Agda development has not yet translated.
 threeDimensionalLocallyValid : Triangulation 3 simplex_count → Bool
 threeDimensionalLocallyValid currentTriangulation =
   not (threeDimensionalHasBadIdentification currentTriangulation) and
