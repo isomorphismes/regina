@@ -10,7 +10,7 @@ module Regina.SubfaceTests where
 open import Regina.Foundation
 open import Regina.Triangulation
 open import Regina.Examples
-open import Regina.Subfaces3
+open import Regina.SubfaceIncidence3
 
 private
   record ResolutionSummary : Set where
