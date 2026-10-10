@@ -194,14 +194,14 @@ ball_triangles_are_boundary_and_not_forest_edges :
    countForestTriangles (ball 3) ∷ []) ≡ (4 ∷ 0 ∷ [])
 ball_triangles_are_boundary_and_not_forest_edges = refl
 
-sphere_has_one_triangle_in_the_dual_forest :
+sphere_has_one_triangle_marked_by_the_dual_forest :
   map_outcome
     (λ currentTriangulation →
       countBoundaryTriangles currentTriangulation ∷
       countForestTriangles currentTriangulation ∷ [])
     (sphere 3) ≡ accepted (0 ∷ 1 ∷ [])
-sphere_has_one_triangle_in_the_dual_forest = refl
+sphere_has_one_triangle_marked_by_the_dual_forest = refl
 
-figure_eight_has_one_triangle_in_the_dual_forest :
+figure_eight_has_one_triangle_marked_by_the_dual_forest :
   map_outcome countForestTriangles figure_eight_knot_complement ≡ accepted 1
-figure_eight_has_one_triangle_in_the_dual_forest = refl
+figure_eight_has_one_triangle_marked_by_the_dual_forest = refl
