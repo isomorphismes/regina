@@ -152,7 +152,8 @@ facetMember target (candidate ∷ remaining) =
 dualForestFacets : Triangulation dimension simplex_count →
   List (Facet dimension simplex_count)
 dualForestFacets current = fold_right
-  (λ edge remaining → parent_facet edge ∷ child_facet edge ∷ remaining)
+  (λ forestEdge remaining →
+    parent_facet forestEdge ∷ child_facet forestEdge ∷ remaining)
   [] (dualForestEdges current)
 
 facetInDualForest : Triangulation dimension simplex_count →
@@ -160,26 +161,28 @@ facetInDualForest : Triangulation dimension simplex_count →
 facetInDualForest current queriedFacet =
   facetMember queriedFacet (dualForestFacets current)
 
+findParentFacet : Fin simplex_count →
+  List (DualForestEdge dimension simplex_count) →
+  Maybe (Facet dimension simplex_count)
+findParentFacet target [] = nothing
+findParentFacet target (currentEdge ∷ remaining) with
+  fin_equal target (simplex_number (child_facet currentEdge))
+... | true = just (parent_facet currentEdge)
+... | false = findParentFacet target remaining
+
+findChildFacet : Fin simplex_count →
+  List (DualForestEdge dimension simplex_count) →
+  Maybe (Facet dimension simplex_count)
+findChildFacet target [] = nothing
+findChildFacet target (currentEdge ∷ remaining) with
+  fin_equal target (simplex_number (child_facet currentEdge))
+... | true = just (child_facet currentEdge)
+... | false = findChildFacet target remaining
+
 parentFacetOf : Triangulation dimension simplex_count →
   Fin simplex_count → Maybe (Facet dimension simplex_count)
-parentFacetOf current target = findParent (dualForestEdges current)
-  where
-  findParent : List (DualForestEdge dimension simplex_count) →
-    Maybe (Facet dimension simplex_count)
-  findParent [] = nothing
-  findParent (edge ∷ remaining) with
-    fin_equal target (simplex_number (child_facet edge))
-  ... | true = just (parent_facet edge)
-  ... | false = findParent remaining
+parentFacetOf current target = findParentFacet target (dualForestEdges current)
 
 childFacetOf : Triangulation dimension simplex_count →
   Fin simplex_count → Maybe (Facet dimension simplex_count)
-childFacetOf current target = findChild (dualForestEdges current)
-  where
-  findChild : List (DualForestEdge dimension simplex_count) →
-    Maybe (Facet dimension simplex_count)
-  findChild [] = nothing
-  findChild (edge ∷ remaining) with
-    fin_equal target (simplex_number (child_facet edge))
-  ... | true = just (child_facet edge)
-  ... | false = findChild remaining
+childFacetOf current target = findChildFacet target (dualForestEdges current)
