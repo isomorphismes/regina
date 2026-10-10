@@ -101,14 +101,15 @@ processOrientationLookup : Triangulation 3 simplex_count →
   SimplexOrientationState3 simplex_count →
   Maybe (Gluing 3 simplex_count) →
   SimplexOrientationState3 simplex_count
-processOrientationLookup currentTriangulation sourceLabel currentState nothing =
-  currentState
-processOrientationLookup currentTriangulation sourceLabel currentState
-  (just outwardGluing) = recordProposedOrientation currentState proposedLabel
-  (findOrientationLabel (adjacent_simplex outwardGluing)
-    (simplex_orientation_labels currentState))
+processOrientationLookup {simplex_count = numberOfSimplices}
+  currentTriangulation sourceLabel currentState nothing = currentState
+processOrientationLookup {simplex_count = numberOfSimplices}
+  currentTriangulation sourceLabel currentState (just outwardGluing) =
+  recordProposedOrientation currentState proposedLabel
+    (findOrientationLabel (adjacent_simplex outwardGluing)
+      (simplex_orientation_labels currentState))
   where
-  proposedLabel : SimplexOrientationLabel3 simplex_count
+  proposedLabel : SimplexOrientationLabel3 numberOfSimplices
   proposedLabel = simplex_orientation_label_three
     (adjacent_simplex outwardGluing)
     (transportSimplexOrientation
@@ -154,7 +155,8 @@ walkOrientationQueueByFuel (suc remainingFuel) currentTriangulation currentState
 startOrientationRoot : Nat → Triangulation 3 simplex_count →
   SimplexOrientationState3 simplex_count → Fin simplex_count →
   SimplexOrientationState3 simplex_count
-startOrientationRoot fuel currentTriangulation currentState rootSimplex
+startOrientationRoot {simplex_count = numberOfSimplices} fuel
+  currentTriangulation currentState rootSimplex
   with findOrientationLabel rootSimplex
     (simplex_orientation_labels currentState)
 ... | just existingLabel = currentState
@@ -164,7 +166,7 @@ startOrientationRoot fuel currentTriangulation currentState rootSimplex
     (rootLabel ∷ [])
     (simplex_orientation_conflict currentState))
   where
-  rootLabel : SimplexOrientationLabel3 simplex_count
+  rootLabel : SimplexOrientationLabel3 numberOfSimplices
   rootLabel = simplex_orientation_label_three rootSimplex Components.positive
 
 processOrientationRoots : Nat → Triangulation 3 simplex_count →
@@ -431,15 +433,16 @@ assembleOrderedEdgeLink classNumber seedSimplex seedEdgeNumber
 buildOrderedEdgeLink : Nat → Nat → Triangulation 3 simplex_count →
   Fin simplex_count → Nat →
   Embeddings.FaceEmbedding 3 simplex_count → OrderedEdgeLink3 simplex_count
-buildOrderedEdgeLink classNumber walkFuel currentTriangulation
-  seedSimplex seedEdgeNumber initialEmbedding = assembleOrderedEdgeLink
-  classNumber seedSimplex seedEdgeNumber forwardResult backwardResult
+buildOrderedEdgeLink {simplex_count = numberOfSimplices}
+  classNumber walkFuel currentTriangulation seedSimplex seedEdgeNumber
+  initialEmbedding = assembleOrderedEdgeLink classNumber seedSimplex
+  seedEdgeNumber forwardResult backwardResult
   where
-  forwardResult : EdgeDirectionResult3 simplex_count
+  forwardResult : EdgeDirectionResult3 numberOfSimplices
   forwardResult = walkEdgeByFuel walkFuel edge_walk_forward
     currentTriangulation initialEmbedding (initialEmbedding ∷ []) false
 
-  backwardResult : EdgeDirectionResult3 simplex_count
+  backwardResult : EdgeDirectionResult3 numberOfSimplices
   backwardResult = walkEdgeByFuel walkFuel edge_walk_backward
     currentTriangulation initialEmbedding
     (direction_embeddings forwardResult)
@@ -469,13 +472,15 @@ processEdgeSeedAfterEmbedding : Nat → Triangulation 3 simplex_count →
   Fin simplex_count → Nat → OrderedEdgePartitionState3 simplex_count →
   Maybe (Embeddings.FaceEmbedding 3 simplex_count) →
   OrderedEdgePartitionState3 simplex_count
-processEdgeSeedAfterEmbedding walkFuel currentTriangulation simplexIndex
-  edgeNumber currentState nothing = ordered_edge_partition_state_three
-  (partition_edge_classes currentState)
-  (partition_next_class_number currentState)
-  false
-processEdgeSeedAfterEmbedding walkFuel currentTriangulation simplexIndex
-  edgeNumber currentState (just seedEmbedding)
+processEdgeSeedAfterEmbedding {simplex_count = numberOfSimplices}
+  walkFuel currentTriangulation simplexIndex edgeNumber currentState nothing =
+  ordered_edge_partition_state_three
+    (partition_edge_classes currentState)
+    (partition_next_class_number currentState)
+    false
+processEdgeSeedAfterEmbedding {simplex_count = numberOfSimplices}
+  walkFuel currentTriangulation simplexIndex edgeNumber currentState
+  (just seedEmbedding)
   with edgeFaceSeen (Embeddings.embedded_local_face seedEmbedding)
     (partition_edge_classes currentState)
 ... | true = currentState
@@ -485,7 +490,7 @@ processEdgeSeedAfterEmbedding walkFuel currentTriangulation simplexIndex
   (partition_edge_complete currentState and
     ordered_edge_walk_complete newClass)
   where
-  newClass : OrderedEdgeLink3 simplex_count
+  newClass : OrderedEdgeLink3 numberOfSimplices
   newClass = buildOrderedEdgeLink
     (partition_next_class_number currentState)
     walkFuel currentTriangulation simplexIndex edgeNumber seedEmbedding
@@ -659,21 +664,22 @@ validateStructureByShape edge_link_incomplete currentTriangulation currentClass
 
 orderedEdgeClassStructureValid : Triangulation 3 simplex_count →
   OrderedEdgeLink3 simplex_count → Bool
-orderedEdgeClassStructureValid currentTriangulation currentClass =
-  validateStructureByShape (ordered_edge_shape currentClass)
-    currentTriangulation currentClass firstEmbedding lastEmbedding consecutive
+orderedEdgeClassStructureValid {simplex_count = numberOfSimplices}
+  currentTriangulation currentClass = validateStructureByShape
+  (ordered_edge_shape currentClass) currentTriangulation currentClass
+  firstEmbedding lastEmbedding consecutive
   where
-  currentEmbeddings : List (Embeddings.FaceEmbedding 3 simplex_count)
+  currentEmbeddings : List (Embeddings.FaceEmbedding 3 numberOfSimplices)
   currentEmbeddings = ordered_edge_embeddings currentClass
 
   consecutive : Bool
   consecutive = consecutiveForwardCompatible currentTriangulation
     currentEmbeddings
 
-  firstEmbedding : Maybe (Embeddings.FaceEmbedding 3 simplex_count)
+  firstEmbedding : Maybe (Embeddings.FaceEmbedding 3 numberOfSimplices)
   firstEmbedding = firstEmbeddingOf currentEmbeddings
 
-  lastEmbedding : Maybe (Embeddings.FaceEmbedding 3 simplex_count)
+  lastEmbedding : Maybe (Embeddings.FaceEmbedding 3 numberOfSimplices)
   lastEmbedding = lastEmbeddingOf currentEmbeddings
 
 allOrderedEdgeStructuresValid : Triangulation 3 simplex_count → Bool
