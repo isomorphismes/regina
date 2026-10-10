@@ -44,20 +44,32 @@ otherVertices currentOccurrence with selectedVertex currentOccurrence
   (λ localVertex → not (fin_equal localVertex selectedLocalVertex))
   (all_fin 4)
 
+verticesDifferentFromBoth : Fin 4 → Fin 4 → Fin 4 → Bool
+verticesDifferentFromBoth firstExcluded secondExcluded candidateVertex = not
+  (fin_equal candidateVertex firstExcluded or
+   fin_equal candidateVertex secondExcluded)
+
 sideEndpointVertices : Fin 4 → Fin 4 → List (Fin 4)
 sideEndpointVertices selectedLocalVertex exitFacet = filterElements
-  (λ localVertex → not
-    (fin_equal localVertex selectedLocalVertex or
-     fin_equal localVertex exitFacet))
-  (all_fin 4)
+  (verticesDifferentFromBoth selectedLocalVertex exitFacet) (all_fin 4)
 
 singletonVertexMask : Fin 4 → Vector Bool 4
 singletonVertexMask selectedLocalVertex = tabulate_vector 4
   (λ localVertex → fin_equal localVertex selectedLocalVertex)
 
+edgeMask : Fin 4 → Fin 4 → Vector Bool 4
+edgeMask firstVertex secondVertex = tabulate_vector 4
+  (λ localVertex →
+    fin_equal localVertex firstVertex or fin_equal localVertex secondVertex)
+
 localVertexFace : Fin simplex_count → Fin 4 → LocalFace 3 simplex_count
 localVertexFace simplexIndex localVertex =
   local_face simplexIndex (singletonVertexMask localVertex)
+
+localEdgeFace : Fin simplex_count → Fin 4 → Fin 4 →
+  LocalFace 3 simplex_count
+localEdgeFace simplexIndex firstVertex secondVertex =
+  local_face simplexIndex (edgeMask firstVertex secondVertex)
 
 findOccurrenceIndexFrom : Nat → LocalFace 3 simplex_count →
   List (Embeddings.FaceEmbedding 3 simplex_count) → Maybe Nat
@@ -74,6 +86,147 @@ findOccurrenceIndex : LocalFace 3 simplex_count →
   List (Embeddings.FaceEmbedding 3 simplex_count) → Maybe Nat
 findOccurrenceIndex targetFace triangleOccurrences =
   findOccurrenceIndexFrom zero targetFace triangleOccurrences
+
+record IndexedEdgeClass (simplex_count : Nat) : Set where
+  constructor indexed_edge_class
+  field
+    indexed_edge_number : Nat
+    indexed_edge_value : FaceLinkClass 3 simplex_count
+open IndexedEdgeClass public
+
+findIndexedEdgeClassFrom : Nat → LocalFace 3 simplex_count →
+  List (FaceLinkClass 3 simplex_count) → Maybe (IndexedEdgeClass simplex_count)
+findIndexedEdgeClassFrom currentIndex targetEdge [] = nothing
+findIndexedEdgeClassFrom currentIndex targetEdge
+  (currentEdgeClass ∷ remainingEdgeClasses)
+  with any
+    (λ currentEmbedding → local_face_equal targetEdge
+      (Embeddings.embedded_local_face currentEmbedding))
+    (face_link_embeddings currentEdgeClass)
+... | true = just (indexed_edge_class currentIndex currentEdgeClass)
+... | false = findIndexedEdgeClassFrom (suc currentIndex)
+  targetEdge remainingEdgeClasses
+
+findIndexedEdgeClass : LocalFace 3 simplex_count →
+  List (FaceLinkClass 3 simplex_count) → Maybe (IndexedEdgeClass simplex_count)
+findIndexedEdgeClass targetEdge edgeClasses =
+  findIndexedEdgeClassFrom zero targetEdge edgeClasses
+
+findMatchingEdgeEmbedding : LocalFace 3 simplex_count →
+  List (Embeddings.FaceEmbedding 3 simplex_count) →
+  Maybe (Embeddings.FaceEmbedding 3 simplex_count)
+findMatchingEdgeEmbedding targetEdge [] = nothing
+findMatchingEdgeEmbedding targetEdge
+  (currentEmbedding ∷ remainingEmbeddings)
+  with local_face_equal targetEdge
+    (Embeddings.embedded_local_face currentEmbedding)
+... | true = just currentEmbedding
+... | false = findMatchingEdgeEmbedding targetEdge remainingEmbeddings
+
+endpointNumberFromList : Fin 4 → List (Fin 4) → Maybe Nat
+endpointNumberFromList selectedLocalVertex [] = nothing
+endpointNumberFromList selectedLocalVertex (firstVertex ∷ [])
+  with fin_equal selectedLocalVertex firstVertex
+... | true = just zero
+... | false = nothing
+endpointNumberFromList selectedLocalVertex
+  (firstVertex ∷ secondVertex ∷ remainingVertices)
+  with fin_equal selectedLocalVertex firstVertex
+... | true = just zero
+... | false with fin_equal selectedLocalVertex secondVertex
+...   | true = just (suc zero)
+...   | false = nothing
+
+record LinkCornerLabel : Set where
+  constructor link_corner_label
+  field
+    corner_edge_class_number : Nat
+    corner_edge_endpoint_number : Nat
+open LinkCornerLabel public
+
+cornerLabelEqual : LinkCornerLabel → LinkCornerLabel → Bool
+cornerLabelEqual firstLabel secondLabel =
+  nat_equal
+    (corner_edge_class_number firstLabel)
+    (corner_edge_class_number secondLabel) and
+  nat_equal
+    (corner_edge_endpoint_number firstLabel)
+    (corner_edge_endpoint_number secondLabel)
+
+cornerLabelAfterEmbedding : Nat → Fin 4 →
+  Maybe (Embeddings.FaceEmbedding 3 simplex_count) → Maybe LinkCornerLabel
+cornerLabelAfterEmbedding edgeClassNumber selectedLocalVertex nothing = nothing
+cornerLabelAfterEmbedding edgeClassNumber selectedLocalVertex
+  (just matchingEmbedding)
+  with endpointNumberFromList selectedLocalVertex
+    (Embeddings.ordered_simplex_vertices matchingEmbedding)
+... | nothing = nothing
+... | just endpointNumber =
+  just (link_corner_label edgeClassNumber endpointNumber)
+
+cornerLabelAfterEdgeClass : Fin 4 → LocalFace 3 simplex_count →
+  Maybe (IndexedEdgeClass simplex_count) → Maybe LinkCornerLabel
+cornerLabelAfterEdgeClass selectedLocalVertex targetEdge nothing = nothing
+cornerLabelAfterEdgeClass selectedLocalVertex targetEdge
+  (just indexedEdgeClass) = cornerLabelAfterEmbedding
+  (indexed_edge_number indexedEdgeClass)
+  selectedLocalVertex
+  (findMatchingEdgeEmbedding targetEdge
+    (face_link_embeddings (indexed_edge_value indexedEdgeClass)))
+
+cornerLabelForVertices : List (FaceLinkClass 3 simplex_count) →
+  Embeddings.FaceEmbedding 3 simplex_count → Fin 4 → Fin 4 →
+  Maybe LinkCornerLabel
+cornerLabelForVertices edgeClasses currentOccurrence selectedLocalVertex
+  otherLocalVertex = cornerLabelAfterEdgeClass selectedLocalVertex targetEdge
+  (findIndexedEdgeClass targetEdge edgeClasses)
+  where
+  targetEdge : LocalFace 3 simplex_count
+  targetEdge = localEdgeFace
+    (face_simplex (Embeddings.embedded_local_face currentOccurrence))
+    selectedLocalVertex otherLocalVertex
+
+cornerLabelsForVertices : List (FaceLinkClass 3 simplex_count) →
+  Embeddings.FaceEmbedding 3 simplex_count → Fin 4 → List (Fin 4) →
+  List (Maybe LinkCornerLabel)
+cornerLabelsForVertices edgeClasses currentOccurrence selectedLocalVertex
+  localVertices = map
+  (cornerLabelForVertices edgeClasses currentOccurrence selectedLocalVertex)
+  localVertices
+
+cornerLabelsForOccurrence : List (FaceLinkClass 3 simplex_count) →
+  Embeddings.FaceEmbedding 3 simplex_count → List (Maybe LinkCornerLabel)
+cornerLabelsForOccurrence edgeClasses currentOccurrence
+  with selectedVertex currentOccurrence
+... | nothing = []
+... | just selectedLocalVertex = cornerLabelsForVertices edgeClasses
+  currentOccurrence selectedLocalVertex (otherVertices currentOccurrence)
+
+record ExplicitLinkTriangle (simplex_count : Nat) : Set where
+  constructor explicit_link_triangle
+  field
+    explicit_triangle_number : Nat
+    explicit_triangle_occurrence :
+      Embeddings.FaceEmbedding 3 simplex_count
+    explicit_triangle_corner_labels : List (Maybe LinkCornerLabel)
+open ExplicitLinkTriangle public
+
+assembleTrianglesFrom : List (FaceLinkClass 3 simplex_count) → Nat →
+  List (Embeddings.FaceEmbedding 3 simplex_count) →
+  List (ExplicitLinkTriangle simplex_count)
+assembleTrianglesFrom edgeClasses nextTriangleNumber [] = []
+assembleTrianglesFrom edgeClasses nextTriangleNumber
+  (currentOccurrence ∷ remainingOccurrences) =
+  explicit_link_triangle nextTriangleNumber currentOccurrence
+    (cornerLabelsForOccurrence edgeClasses currentOccurrence) ∷
+  assembleTrianglesFrom edgeClasses (suc nextTriangleNumber)
+    remainingOccurrences
+
+assembleTriangles : List (FaceLinkClass 3 simplex_count) →
+  List (Embeddings.FaceEmbedding 3 simplex_count) →
+  List (ExplicitLinkTriangle simplex_count)
+assembleTriangles edgeClasses triangleOccurrences =
+  assembleTrianglesFrom edgeClasses zero triangleOccurrences
 
 record LinkSideAddress : Set where
   constructor link_side_address
@@ -192,256 +345,94 @@ buildAllSides currentTriangulation triangleOccurrences =
   buildAllSidesFrom currentTriangulation triangleOccurrences zero
     triangleOccurrences
 
-record LinkCornerAddress : Set where
-  constructor link_corner_address
-  field
-    corner_triangle_number : Nat
-    corner_other_vertex_number : Nat
-open LinkCornerAddress public
+cornerLabelMember : LinkCornerLabel → List LinkCornerLabel → Bool
+cornerLabelMember targetLabel [] = false
+cornerLabelMember targetLabel (currentLabel ∷ remainingLabels) =
+  cornerLabelEqual targetLabel currentLabel or
+  cornerLabelMember targetLabel remainingLabels
 
-record LinkTriangleCorner (simplex_count : Nat) : Set where
-  constructor link_triangle_corner
-  field
-    containing_triangle_number : Nat
-    containing_occurrence : Embeddings.FaceEmbedding 3 simplex_count
-    other_local_vertex : Fin 4
-open LinkTriangleCorner public
+insertCornerLabel : LinkCornerLabel → List LinkCornerLabel → List LinkCornerLabel
+insertCornerLabel newLabel existingLabels with
+  cornerLabelMember newLabel existingLabels
+... | true = existingLabels
+... | false = newLabel ∷ existingLabels
 
-cornerAddress : LinkTriangleCorner simplex_count → LinkCornerAddress
-cornerAddress currentCorner = link_corner_address
-  (containing_triangle_number currentCorner)
-  (fin_to_nat (other_local_vertex currentCorner))
+collectResolvedLabels : List (Maybe LinkCornerLabel) →
+  List LinkCornerLabel → List LinkCornerLabel
+collectResolvedLabels [] accumulatedLabels = accumulatedLabels
+collectResolvedLabels (nothing ∷ remainingLabels) accumulatedLabels =
+  collectResolvedLabels remainingLabels accumulatedLabels
+collectResolvedLabels (just currentLabel ∷ remainingLabels) accumulatedLabels =
+  collectResolvedLabels remainingLabels
+    (insertCornerLabel currentLabel accumulatedLabels)
 
-cornerAddressEqual : LinkCornerAddress → LinkCornerAddress → Bool
-cornerAddressEqual firstAddress secondAddress =
-  nat_equal (corner_triangle_number firstAddress)
-    (corner_triangle_number secondAddress) and
-  nat_equal (corner_other_vertex_number firstAddress)
-    (corner_other_vertex_number secondAddress)
+collectTriangleLabels : List (ExplicitLinkTriangle simplex_count) →
+  List LinkCornerLabel → List LinkCornerLabel
+collectTriangleLabels [] accumulatedLabels = accumulatedLabels
+collectTriangleLabels (currentTriangle ∷ remainingTriangles)
+  accumulatedLabels = collectTriangleLabels remainingTriangles
+  (collectResolvedLabels
+    (explicit_triangle_corner_labels currentTriangle) accumulatedLabels)
 
-cornerEqual : LinkTriangleCorner simplex_count →
-  LinkTriangleCorner simplex_count → Bool
-cornerEqual firstCorner secondCorner =
-  cornerAddressEqual (cornerAddress firstCorner) (cornerAddress secondCorner)
+cornerLabelResolved : Maybe LinkCornerLabel → Bool
+cornerLabelResolved nothing = false
+cornerLabelResolved (just currentLabel) = true
 
-buildCornersForVertices : Nat →
-  Embeddings.FaceEmbedding 3 simplex_count → List (Fin 4) →
-  List (LinkTriangleCorner simplex_count)
-buildCornersForVertices triangleNumber currentOccurrence [] = []
-buildCornersForVertices triangleNumber currentOccurrence
-  (otherLocalVertex ∷ remainingVertices) =
-  link_triangle_corner triangleNumber currentOccurrence otherLocalVertex ∷
-  buildCornersForVertices triangleNumber currentOccurrence remainingVertices
-
-buildAllCornersFrom : Nat →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  List (LinkTriangleCorner simplex_count)
-buildAllCornersFrom nextTriangleNumber [] = []
-buildAllCornersFrom nextTriangleNumber
-  (currentOccurrence ∷ remainingOccurrences) =
-  buildCornersForVertices nextTriangleNumber currentOccurrence
-    (otherVertices currentOccurrence) ++
-  buildAllCornersFrom (suc nextTriangleNumber) remainingOccurrences
-
-buildAllCorners : List (Embeddings.FaceEmbedding 3 simplex_count) →
-  List (LinkTriangleCorner simplex_count)
-buildAllCorners triangleOccurrences = buildAllCornersFrom zero triangleOccurrences
-
-cornerTargetAddress : Maybe Nat → Fin 4 → Maybe LinkCornerAddress
-cornerTargetAddress nothing targetOtherVertex = nothing
-cornerTargetAddress (just targetTriangleNumber) targetOtherVertex =
-  just (link_corner_address targetTriangleNumber
-    (fin_to_nat targetOtherVertex))
-
-cornerTargetAfterLookup :
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  Fin 4 → Fin 4 → Maybe (Gluing 3 simplex_count) →
-  Maybe LinkCornerAddress
-cornerTargetAfterLookup triangleOccurrences selectedLocalVertex
-  otherLocalVertex nothing = nothing
-cornerTargetAfterLookup triangleOccurrences selectedLocalVertex
-  otherLocalVertex (just outwardGluing) = cornerTargetAddress
-  (findOccurrenceIndex
-    (localVertexFace
-      (adjacent_simplex outwardGluing)
-      (image (vertex_permutation outwardGluing) selectedLocalVertex))
-    triangleOccurrences)
-  (image (vertex_permutation outwardGluing) otherLocalVertex)
-
-cornerTargetAcrossFacet : Triangulation 3 simplex_count →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  LinkTriangleCorner simplex_count → Fin 4 → Maybe LinkCornerAddress
-cornerTargetAcrossFacet currentTriangulation triangleOccurrences
-  currentCorner exitFacet with selectedVertex (containing_occurrence currentCorner)
-... | nothing = nothing
-... | just selectedLocalVertex = cornerTargetAcrossFacetAfterSelection
-  currentTriangulation triangleOccurrences currentCorner exitFacet
-  selectedLocalVertex
-
-cornerTargetAcrossFacetAfterSelection : Triangulation 3 simplex_count →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  LinkTriangleCorner simplex_count → Fin 4 → Fin 4 →
-  Maybe LinkCornerAddress
-cornerTargetAcrossFacetAfterSelection currentTriangulation
-  triangleOccurrences currentCorner exitFacet selectedLocalVertex
-  with fin_equal exitFacet selectedLocalVertex or
-       fin_equal exitFacet (other_local_vertex currentCorner)
-... | true = nothing
-... | false = cornerTargetAfterLookup triangleOccurrences selectedLocalVertex
-  (other_local_vertex currentCorner)
-  (adjacency (raw_state currentTriangulation)
-    (facet
-      (face_simplex
-        (Embeddings.embedded_local_face
-          (containing_occurrence currentCorner)))
-      exitFacet))
-
-collectCornerTargets : Triangulation 3 simplex_count →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  LinkTriangleCorner simplex_count → List (Fin 4) → List LinkCornerAddress
-collectCornerTargets currentTriangulation triangleOccurrences currentCorner [] = []
-collectCornerTargets currentTriangulation triangleOccurrences currentCorner
-  (exitFacet ∷ remainingFacets)
-  with cornerTargetAcrossFacet currentTriangulation triangleOccurrences
-    currentCorner exitFacet
-... | nothing = collectCornerTargets currentTriangulation triangleOccurrences
-  currentCorner remainingFacets
-... | just targetAddress = targetAddress ∷
-  collectCornerTargets currentTriangulation triangleOccurrences currentCorner
-    remainingFacets
-
-cornerTargets : Triangulation 3 simplex_count →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  LinkTriangleCorner simplex_count → List LinkCornerAddress
-cornerTargets currentTriangulation triangleOccurrences currentCorner =
-  collectCornerTargets currentTriangulation triangleOccurrences currentCorner
-    (all_fin 4)
-
-addressMember : LinkCornerAddress → List LinkCornerAddress → Bool
-addressMember targetAddress [] = false
-addressMember targetAddress (currentAddress ∷ remainingAddresses) =
-  cornerAddressEqual targetAddress currentAddress or
-  addressMember targetAddress remainingAddresses
-
-directlyConnected : Triangulation 3 simplex_count →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  LinkTriangleCorner simplex_count → LinkTriangleCorner simplex_count → Bool
-directlyConnected currentTriangulation triangleOccurrences
-  firstCorner secondCorner = cornerEqual firstCorner secondCorner or
-  addressMember (cornerAddress secondCorner)
-    (cornerTargets currentTriangulation triangleOccurrences firstCorner)
-
-expandOnce : Triangulation 3 simplex_count →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  List (LinkTriangleCorner simplex_count) →
-  List (LinkTriangleCorner simplex_count) →
-  List (LinkTriangleCorner simplex_count)
-expandOnce currentTriangulation triangleOccurrences cornerUniverse
-  reachedCorners = filterElements
-  (λ candidateCorner → any
-    (λ knownCorner → directlyConnected currentTriangulation
-      triangleOccurrences knownCorner candidateCorner)
-    reachedCorners)
-  cornerUniverse
-
-expandCorners : Nat → Triangulation 3 simplex_count →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  List (LinkTriangleCorner simplex_count) →
-  List (LinkTriangleCorner simplex_count) →
-  List (LinkTriangleCorner simplex_count)
-expandCorners zero currentTriangulation triangleOccurrences cornerUniverse
-  reachedCorners = reachedCorners
-expandCorners (suc fuel) currentTriangulation triangleOccurrences cornerUniverse
-  reachedCorners = expandCorners fuel currentTriangulation triangleOccurrences
-  cornerUniverse
-  (expandOnce currentTriangulation triangleOccurrences cornerUniverse
-    reachedCorners)
-
-cornerClassFromSeed : Triangulation 3 simplex_count →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  List (LinkTriangleCorner simplex_count) → LinkTriangleCorner simplex_count →
-  List (LinkTriangleCorner simplex_count)
-cornerClassFromSeed currentTriangulation triangleOccurrences cornerUniverse
-  seedCorner = expandCorners (length cornerUniverse) currentTriangulation
-  triangleOccurrences cornerUniverse (seedCorner ∷ [])
-
-cornerMember : LinkTriangleCorner simplex_count →
-  List (LinkTriangleCorner simplex_count) → Bool
-cornerMember targetCorner [] = false
-cornerMember targetCorner (currentCorner ∷ remainingCorners) =
-  cornerEqual targetCorner currentCorner or
-  cornerMember targetCorner remainingCorners
-
-removeCorners : List (LinkTriangleCorner simplex_count) →
-  List (LinkTriangleCorner simplex_count) →
-  List (LinkTriangleCorner simplex_count)
-removeCorners removedCorners = filterElements
-  (λ candidateCorner → not (cornerMember candidateCorner removedCorners))
-
-partitionCornerClasses : Nat → Triangulation 3 simplex_count →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  List (LinkTriangleCorner simplex_count) →
-  List (LinkTriangleCorner simplex_count) →
-  List (List (LinkTriangleCorner simplex_count))
-partitionCornerClasses zero currentTriangulation triangleOccurrences
-  cornerUniverse remainingCorners = []
-partitionCornerClasses (suc fuel) currentTriangulation triangleOccurrences
-  cornerUniverse [] = []
-partitionCornerClasses (suc fuel) currentTriangulation triangleOccurrences
-  cornerUniverse (seedCorner ∷ remainingCorners)
-  with cornerClassFromSeed currentTriangulation triangleOccurrences
-    cornerUniverse seedCorner
-... | discoveredClass = discoveredClass ∷
-  partitionCornerClasses fuel currentTriangulation triangleOccurrences
-    cornerUniverse (removeCorners discoveredClass remainingCorners)
-
-cornerClasses : Triangulation 3 simplex_count →
-  List (Embeddings.FaceEmbedding 3 simplex_count) →
-  List (List (LinkTriangleCorner simplex_count))
-cornerClasses currentTriangulation triangleOccurrences
-  with buildAllCorners triangleOccurrences
-... | cornerUniverse = partitionCornerClasses (length cornerUniverse)
-  currentTriangulation triangleOccurrences cornerUniverse cornerUniverse
+triangleCornerLabelsResolved : ExplicitLinkTriangle simplex_count → Bool
+triangleCornerLabelsResolved currentTriangle = all cornerLabelResolved
+  (explicit_triangle_corner_labels currentTriangle)
 
 record ExplicitVertexLink (simplex_count : Nat) : Set where
   constructor explicit_vertex_link
   field
     source_vertex_class_number : Nat
-    triangle_occurrences : List (Embeddings.FaceEmbedding 3 simplex_count)
+    explicit_link_triangles : List (ExplicitLinkTriangle simplex_count)
     triangle_sides : List LinkTriangleSide
-    triangle_corner_classes :
-      List (List (LinkTriangleCorner simplex_count))
     explicit_link_has_bad_identification : Bool
     explicit_link_is_orientable : Bool
 open ExplicitVertexLink public
 
-buildExplicitLink : Triangulation 3 simplex_count → Nat →
-  FaceLinkClass 3 simplex_count → ExplicitVertexLink simplex_count
-buildExplicitLink currentTriangulation vertexClassNumber currentVertexClass =
+buildExplicitLinkWithOccurrences : Triangulation 3 simplex_count →
+  List (FaceLinkClass 3 simplex_count) → Nat →
+  FaceLinkClass 3 simplex_count →
+  List (Embeddings.FaceEmbedding 3 simplex_count) →
+  ExplicitVertexLink simplex_count
+buildExplicitLinkWithOccurrences currentTriangulation edgeClasses
+  vertexClassNumber currentVertexClass triangleOccurrences =
   explicit_vertex_link
     vertexClassNumber
-    (face_link_embeddings currentVertexClass)
-    (buildAllSides currentTriangulation
-      (face_link_embeddings currentVertexClass))
-    (cornerClasses currentTriangulation
-      (face_link_embeddings currentVertexClass))
+    (assembleTriangles edgeClasses triangleOccurrences)
+    (buildAllSides currentTriangulation triangleOccurrences)
     (face_has_bad_identification currentVertexClass)
     (face_link_is_orientable currentVertexClass)
 
-buildExplicitLinksFrom : Triangulation 3 simplex_count → Nat →
+buildExplicitLink : Triangulation 3 simplex_count →
+  List (FaceLinkClass 3 simplex_count) → Nat →
+  FaceLinkClass 3 simplex_count → ExplicitVertexLink simplex_count
+buildExplicitLink currentTriangulation edgeClasses vertexClassNumber
+  currentVertexClass = buildExplicitLinkWithOccurrences currentTriangulation
+  edgeClasses vertexClassNumber currentVertexClass
+  (face_link_embeddings currentVertexClass)
+
+buildExplicitLinksFrom : Triangulation 3 simplex_count →
+  List (FaceLinkClass 3 simplex_count) → Nat →
   List (FaceLinkClass 3 simplex_count) →
   List (ExplicitVertexLink simplex_count)
-buildExplicitLinksFrom currentTriangulation nextClassNumber [] = []
-buildExplicitLinksFrom currentTriangulation nextClassNumber
+buildExplicitLinksFrom currentTriangulation edgeClasses nextClassNumber [] = []
+buildExplicitLinksFrom currentTriangulation edgeClasses nextClassNumber
   (currentVertexClass ∷ remainingVertexClasses) =
-  buildExplicitLink currentTriangulation nextClassNumber currentVertexClass ∷
-  buildExplicitLinksFrom currentTriangulation (suc nextClassNumber)
-    remainingVertexClasses
+  buildExplicitLink currentTriangulation edgeClasses nextClassNumber
+    currentVertexClass ∷
+  buildExplicitLinksFrom currentTriangulation edgeClasses
+    (suc nextClassNumber) remainingVertexClasses
 
 explicitVertexLinks : Triangulation 3 simplex_count →
   List (ExplicitVertexLink simplex_count)
 explicitVertexLinks currentTriangulation = buildExplicitLinksFrom
-  currentTriangulation zero (faceLinkClasses currentTriangulation 0)
+  currentTriangulation
+  (faceLinkClasses currentTriangulation 1)
+  zero
+  (faceLinkClasses currentTriangulation 0)
 
 sideIsBoundary : LinkTriangleSide → Bool
 sideIsBoundary currentSide with destination_side currentSide
@@ -465,10 +456,12 @@ halfNatural (suc zero) = zero
 halfNatural (suc (suc remaining)) = suc (halfNatural remaining)
 
 explicitLinkTriangleCount : ExplicitVertexLink simplex_count → Nat
-explicitLinkTriangleCount currentLink = length (triangle_occurrences currentLink)
+explicitLinkTriangleCount currentLink =
+  length (explicit_link_triangles currentLink)
 
 explicitLinkVertexCount : ExplicitVertexLink simplex_count → Nat
-explicitLinkVertexCount currentLink = length (triangle_corner_classes currentLink)
+explicitLinkVertexCount currentLink = length
+  (collectTriangleLabels (explicit_link_triangles currentLink) [])
 
 explicitLinkBoundaryEdgeCount : ExplicitVertexLink simplex_count → Nat
 explicitLinkBoundaryEdgeCount currentLink = count_matching sideIsBoundary
@@ -487,6 +480,10 @@ explicitLinkEulerCharacteristic : ExplicitVertexLink simplex_count →
 explicitLinkEulerCharacteristic currentLink = Link3.naturalDifference
   (explicitLinkVertexCount currentLink + explicitLinkTriangleCount currentLink)
   (explicitLinkEdgeCount currentLink)
+
+explicitLinkCornersResolved : ExplicitVertexLink simplex_count → Bool
+explicitLinkCornersResolved currentLink = all triangleCornerLabelsResolved
+  (explicit_link_triangles currentLink)
 
 sideAddressEqual : LinkSideAddress → LinkSideAddress → Bool
 sideAddressEqual firstAddress secondAddress =
