@@ -40,8 +40,10 @@ characteristics.
 The aggregate also constructs real boundary components from connected unpaired
 facets and ideal boundary components from explicit ideal-vertex links. The
 checked examples recover one real 2-sphere for the ball, no boundary for the
-sphere, one real Euler-zero torus for the ball bundle, and one ideal orientable
-torus for the figure-eight complement.
+sphere, one connected closed real Euler-zero component for the ball bundle, and
+one ideal orientable torus for the figure-eight complement. Regina's source
+describes the three-dimensional ball bundle as the layered-solid-torus analogue;
+the current Agda boundary record does not yet derive its boundary orientation.
 
 This receipt does not claim Regina-compatible packed link-edge permutation
 serialization, real-boundary orientation propagation, higher-dimensional link

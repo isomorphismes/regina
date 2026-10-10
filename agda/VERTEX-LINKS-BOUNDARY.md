@@ -137,12 +137,18 @@ It has no real boundary component because all tetrahedron facets are paired.
 
 ## Checked boundary examples
 
-| Triangulation | Real components | Ideal components | Cell data |
+| Triangulation | Real components | Ideal components | Cell data established by Agda |
 |---|---:|---:|---|
-| `ball 3` | 1 | 0 | real sphere `(4,6,4)`, `χ=2` |
+| `ball 3` | 1 | 0 | closed component `(4,6,4)`, `χ=2` |
 | `sphere 3` | 0 | 0 | none |
-| 3D ball bundle | 1 | 0 | real torus `(1,3,2)`, `χ=0` |
-| figure-eight complement | 0 | 1 | ideal torus `(4,12,8)`, `χ=0` |
+| 3D ball bundle | 1 | 0 | closed component `(1,3,2)`, `χ=0`; orientation not yet computed |
+| figure-eight complement | 0 | 1 | ideal orientable torus `(4,12,8)`, `χ=0` |
+
+Regina describes `ballBundle()` as the higher-dimensional analogue of a layered
+solid torus, and in dimension three its intended real boundary is a torus. The
+current Agda boundary record establishes the connected closed cell structure
+and Euler characteristic but deliberately postpones the orientation calculation
+needed to derive that classification internally.
 
 ## Representation differences and limits
 
