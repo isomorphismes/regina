@@ -4,7 +4,7 @@
 
 -- Check the translated finite core, examples, components, dual forest,
 -- face quotient and embeddings, face-link diagnostics, explicit
--- three-dimensional vertex links, and all reduction tests.
+-- three-dimensional vertex links, boundary components, and all reductions.
 module Regina.All where
 
 import Regina.Foundation
@@ -19,6 +19,7 @@ import Regina.Embeddings
 import Regina.FaceLinks
 import Regina.Link3
 import Regina.VertexLinkSurface3
+import Regina.Boundary3
 import Regina.PermutationTests
 import Regina.TriangulationTests
 import Regina.ComponentTests
@@ -28,3 +29,4 @@ import Regina.EmbeddingTests
 import Regina.FaceLinkTests
 import Regina.Link3Tests
 import Regina.VertexLinkTests
+import Regina.BoundaryTests
