@@ -44,7 +44,7 @@ The Agda record stores forest edges explicitly. Regina stores a facet bit mask
 inside each simplex. The represented forest is the same; the storage layout is
 not.
 
-## Ordered face appearances
+## Generic ordered face appearances
 
 `Regina.Skeleton` identifies a local face only by its simplex and selected
 vertex set. That is sufficient for quotient classes but insufficient to tell
@@ -67,7 +67,7 @@ For the deliberately malformed gluing `[1,0,3,2]`, the edge with initial
 embedding table `[2,3,1,0]` crosses to `[3,2,0,1]`. The selected prefix changes
 from `[2,3]` to `[3,2]`, so the edge is identified with itself in reverse.
 
-## Difference from Regina's complete embedding machinery
+## Relation to Regina's exact embedding machinery
 
 Regina's `FaceEmbedding<dim,subdim>` stores a simplex pointer and a
 `Perm<dim+1>`. Its first `subdim+1` images locate and order the face vertices;
@@ -79,14 +79,21 @@ the remaining images carry link-orientation information. Regina also has:
 - special codimension-one and codimension-two traversal and appearance order;
 - link-orientability flags and bad-link checks.
 
-The Agda record stores a simplex index, a characteristic face mask, and an
-ordered finite list. The selected prefix implements the self-identification
-check. Complementary ordering is retained so crossings are inspectable, but it
-is not claimed to equal Regina's orientation-normalized complement labels.
+The generic `Regina.Embeddings` record stores a simplex index, a characteristic
+face mask, and an ordered finite list. Its selected prefix implements the basic
+self-identification check. This module remains useful as a dimension-generic
+quotient traversal and as an independent cross-check.
 
-Therefore this slice supports explicit appearances, degrees, and
-bad-identification detection. It does not yet support Regina-compatible
-embedding serialization, exact appearance ordering, links, or full validity.
+The formerly missing source-specific codimension-two order is now translated
+separately in [`Regina.ExactEdgeLinks3`](Regina/ExactEdgeLinks3.agda). That
+module uses Regina's exact dimension-three edge ordering tables, walks each edge
+link in both directions, prepends and appends exactly as the C++ source does,
+and retains the directed boundary endpoints of path links. See
+[`EDGE-LINK-ORDER3.md`](EDGE-LINK-ORDER3.md).
+
+Likewise, orientation-normalised link returns and explicit three-dimensional
+vertex links are implemented in later modules. This early slice should not be
+read as the final boundary of the complete Agda branch.
 
 ## Checked reductions
 
@@ -102,6 +109,9 @@ numbers, roots, and non-tree gluings.
 - canonical selected-first ordering;
 - a concrete reversed-edge self-identification;
 - the distinction between that bad edge and its unaffected vertex classes.
+
+The exact source-order edge tests live in `Regina.ExactEdgeLinkTests` and are
+documented separately.
 
 Thank you to Benjamin A. Burton, Ryan Budney, William Pettersson, Richard
 Rannard, and the Regina contributors. Licensing follows the repository's
