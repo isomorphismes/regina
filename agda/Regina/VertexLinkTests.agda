@@ -1,6 +1,6 @@
 {-# OPTIONS --safe --without-K #-}
 
--- Reduction tests for explicit three-dimensional vertex-link complexes.
+-- Reduction tests for explicit three-dimensional vertex-link surfaces.
 -- Copyright (c) 1999-2026, Ben Burton / The Regina development team.
 -- GPL version 2 or later with Regina's distribution permission;
 -- see ../../LICENSE.txt. Translation changes: 2026-10-10.
@@ -11,7 +11,7 @@ open import Regina.Foundation
 open import Regina.Triangulation
 open import Regina.Examples
 open import Regina.Link3
-open import Regina.VertexLinkComplex3
+open import Regina.VertexLinkSurface3
 
 private
   record ExplicitLinkShape : Set where
@@ -23,6 +23,7 @@ private
       observed_boundary_edges : Nat
       observed_paired_sides : Nat
       observed_euler_characteristic : SignedInteger
+      observed_corners_resolved : Bool
       observed_pairings_resolved : Bool
       observed_pairings_reciprocal : Bool
       observed_bad_identification : Bool
@@ -37,6 +38,7 @@ private
     (explicitLinkBoundaryEdgeCount currentLink)
     (explicitLinkPairedSideCount currentLink)
     (explicitLinkEulerCharacteristic currentLink)
+    (explicitLinkCornersResolved currentLink)
     (explicitLinkPairingsResolved currentLink)
     (explicitLinkPairingsReciprocal currentLink)
     (explicit_link_has_bad_identification currentLink)
@@ -50,40 +52,40 @@ private
 ball_has_four_single_triangle_disc_links :
   observeExplicitLinks (ball 3) ≡
     (explicit_link_shape 1 3 3 3 0 (signed_positive 0)
-      true true false true ∷
+      true true true false true ∷
      explicit_link_shape 1 3 3 3 0 (signed_positive 0)
-      true true false true ∷
+      true true true false true ∷
      explicit_link_shape 1 3 3 3 0 (signed_positive 0)
-      true true false true ∷
+      true true true false true ∷
      explicit_link_shape 1 3 3 3 0 (signed_positive 0)
-      true true false true ∷ [])
+      true true true false true ∷ [])
 ball_has_four_single_triangle_disc_links = refl
 
 sphere_has_four_two_triangle_sphere_links :
   map_outcome observeExplicitLinks (sphere 3) ≡
     accepted
       (explicit_link_shape 2 3 3 0 6 (signed_positive 1)
-        true true false true ∷
+        true true true false true ∷
        explicit_link_shape 2 3 3 0 6 (signed_positive 1)
-        true true false true ∷
+        true true true false true ∷
        explicit_link_shape 2 3 3 0 6 (signed_positive 1)
-        true true false true ∷
+        true true true false true ∷
        explicit_link_shape 2 3 3 0 6 (signed_positive 1)
-        true true false true ∷ [])
+        true true true false true ∷ [])
 sphere_has_four_two_triangle_sphere_links = refl
 
 ball_bundle_link_has_four_triangles_and_six_boundary_edges :
   map_outcome observeExplicitLinks three_dimensional_ball_bundle ≡
     accepted
       (explicit_link_shape 4 6 9 6 6 (signed_positive 0)
-        true true false true ∷ [])
+        true true true false true ∷ [])
 ball_bundle_link_has_four_triangles_and_six_boundary_edges = refl
 
 figure_eight_link_has_eight_triangles_and_euler_zero :
   map_outcome observeExplicitLinks figure_eight_knot_complement ≡
     accepted
       (explicit_link_shape 8 4 12 0 24 signed_zero
-        true true false true ∷ [])
+        true true true false true ∷ [])
 figure_eight_link_has_eight_triangles_and_euler_zero = refl
 
 ball_link_side_count_is_three_per_triangle :
