@@ -77,7 +77,7 @@ private
   countForestTriangles : {simplex_count : Nat} →
     Triangulation 3 simplex_count → Nat
   countForestTriangles currentTriangulation = countTrue
-    (map triangle_in_maximal_forest
+    (map triangle_maximal_forest_member
       (triangleProperties currentTriangulation))
 
   countBoundaryTriangles : {simplex_count : Nat} →
