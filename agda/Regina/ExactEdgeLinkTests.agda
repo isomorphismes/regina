@@ -182,10 +182,10 @@ sphere_exact_edge_layer_is_complete :
   map_outcome exactLayerComplete (sphere 3) ≡ accepted true
 sphere_exact_edge_layer_is_complete = refl
 
-ball_bundle_has_three_degree_two_edge_paths :
+ball_bundle_has_directed_edge_paths_of_degrees_three_two_one :
   map_outcome observePaths three_dimensional_ball_bundle ≡
-    accepted (degree_shape_observation (2 ∷ 2 ∷ 2 ∷ []) true)
-ball_bundle_has_three_degree_two_edge_paths = refl
+    accepted (degree_shape_observation (3 ∷ 2 ∷ 1 ∷ []) true)
+ball_bundle_has_directed_edge_paths_of_degrees_three_two_one = refl
 
 ball_bundle_exact_edge_layer_is_complete :
   map_outcome exactLayerComplete three_dimensional_ball_bundle ≡ accepted true
