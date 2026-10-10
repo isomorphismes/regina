@@ -22,8 +22,9 @@ history moved with the repository transfer.
 | [`Regina.Components`](Regina/Components.agda) | Connected components, simplex counts, boundary-facet counts, permutation parity, and orientability. |
 | [`Regina.DualForest`](Regina/DualForest.agda) | Regina's deterministic breadth-first maximal forest in the dual 1-skeleton. |
 | [`Regina.Skeleton`](Regina/Skeleton.agda) | Quotient classes of local vertices, edges, and all other proper faces. |
-| [`Regina.Embeddings`](Regina/Embeddings.agda) | Ordered local-face appearances and non-trivial self-identification detection. |
+| [`Regina.Embeddings`](Regina/Embeddings.agda) | Generic ordered local-face appearances and non-trivial self-identification detection. |
 | [`Regina.FaceLinks`](Regina/FaceLinks.agda) | Orientation-normalised face returns, codimension-specific bad-identification tests, and link orientability. |
+| [`Regina.ExactEdgeLinks3`](Regina/ExactEdgeLinks3.agda) | Regina's exact dimension-three codimension-two path/cycle walk, embedding order, directed boundary endpoints, and complete mappings. |
 | [`Regina.SubfaceIncidence3`](Regina/SubfaceIncidence3.agda) | Dimension-three `Face::face()` and active `faceMapping()` semantics for edge endpoints and triangle vertices and edges. |
 | [`Regina.TetrahedronFaces3`](Regina/TetrahedronFaces3.agda) | Dimension-three `Simplex::face()` and `Simplex::faceMapping()` semantics for tetrahedron vertices, edges, and triangles. |
 | [`Regina.Link3`](Regina/Link3.agda) | Three-dimensional vertex-link Euler characteristics and finite, real-boundary, or ideal classification. |
@@ -40,8 +41,9 @@ Source maps:
 - [`SOURCE-MAP.tsv`](SOURCE-MAP.tsv): permutations, gluings, transitions, input, and examples;
 - [`COMPONENTS-SOURCE-MAP.tsv`](COMPONENTS-SOURCE-MAP.tsv): components and orientability;
 - [`SKELETON-SOURCE-MAP.tsv`](SKELETON-SOURCE-MAP.tsv): lower-dimensional face quotient;
-- [`FOREST-EMBEDDINGS-SOURCE-MAP.tsv`](FOREST-EMBEDDINGS-SOURCE-MAP.tsv): dual forest and ordered embeddings;
+- [`FOREST-EMBEDDINGS-SOURCE-MAP.tsv`](FOREST-EMBEDDINGS-SOURCE-MAP.tsv): dual forest and generic ordered embeddings;
 - [`FACE-LINKS-SOURCE-MAP.tsv`](FACE-LINKS-SOURCE-MAP.tsv): orientation-normalised face links and three-dimensional Euler data;
+- [`EDGE-LINK-ORDER3-SOURCE-MAP.tsv`](EDGE-LINK-ORDER3-SOURCE-MAP.tsv): exact dimension-three edge-link paths, cycles, and embedding order;
 - [`SUBFACES3-SOURCE-MAP.tsv`](SUBFACES3-SOURCE-MAP.tsv): dimension-three face-to-subface lookup, mappings, and incidences;
 - [`TETRAHEDRON-FACES3-SOURCE-MAP.tsv`](TETRAHEDRON-FACES3-SOURCE-MAP.tsv): dimension-three tetrahedron face tables and mappings;
 - [`VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv`](VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv): explicit vertex-link surfaces and boundary components;
@@ -61,7 +63,7 @@ paired facet, the checker establishes that the other side returns to the source
 simplex, uses the inverse vertex map, names a different facet, and carries the
 same facet lock.
 
-## Components, global faces, and links
+## Components, global faces, and dual forest
 
 Top-dimensional simplices form a finite adjacency graph through paired facets.
 Finite closure partitions them into connected components. An even facet
@@ -75,14 +77,59 @@ reaches each undiscovered simplex.
 
 A local `k`-face is a simplex index plus a Boolean characteristic vector
 selecting exactly `k+1` local vertices. Traversing facet gluings and taking
-finite closure produces global face classes. Ordered embeddings retain the
-complete local vertex order. `Regina.FaceLinks` applies Regina's complementary
-orientation convention before crossings and keeps separate flags for a
-non-trivial face self-identification and a nonorientable link return.
+finite closure produces global face classes. Generic ordered embeddings retain
+the complete local vertex order. `Regina.FaceLinks` applies Regina's
+complementary orientation convention before crossings and keeps separate flags
+for a non-trivial face self-identification and a nonorientable link return.
 
-## Face-to-subface lookup
+## Exact dimension-three edge links
 
-`Regina.SubfaceIncidence3` provides the fixed-dimension lower-face operations:
+`Regina.ExactEdgeLinks3` now translates Regina's special codimension-two
+algorithm instead of treating edge classes as unordered finite closures.
+
+The six source edge maps are:
+
+```text
+[0,1,2,3]
+[0,2,3,1]
+[0,3,1,2]
+[1,2,0,3]
+[1,3,2,0]
+[2,3,0,1]
+```
+
+Positions `0,1` are edge endpoints and positions `2,3` are the two link
+directions. After adjusting the seed map to the tetrahedron orientation, the
+algorithm walks through position `2` and appends, then through position `3` and
+prepends. Every crossing applies
+
+```text
+adjacentGluing * currentMapping * swap(2,3).
+```
+
+This yields Regina's actual ordered path or cycle, including the directed first
+and last boundary facets for a path. A return to an already assigned local edge
+compares the complete mapping and detects a reversed self-identification.
+
+Checked exact results:
+
+| Triangulation | Exact edge links |
+|---|---|
+| `ball 3` | six degree-one paths, in local seed order |
+| `sphere 3` | six degree-two cycles |
+| 3D ball bundle | three paths of degrees `3,2,1` |
+| figure-eight complement | two degree-six cycles |
+
+The exact classes are cross-checked against the generic face quotient for
+membership, degree, and bad-identification status. Their total degree is also
+checked to be six times the number of tetrahedra, and every path endpoint and
+cycle closure is re-evaluated from the triangulation.
+
+See [`EDGE-LINK-ORDER3.md`](EDGE-LINK-ORDER3.md).
+
+## Face-to-subface and tetrahedron-face lookup
+
+`Regina.SubfaceIncidence3` provides:
 
 ```text
 edge -> vertex
@@ -95,11 +142,7 @@ The first `lowerdim + 1` images map the lower face's inherent vertex labels into
 the containing face's inherent labels. Loop edges retain distinct endpoint
 mappings even when both endpoints return the same global vertex.
 
-See [`SUBFACES3.md`](SUBFACES3.md).
-
-## Tetrahedron face lookup
-
-`Regina.TetrahedronFaces3` implements the other incidence direction:
+`Regina.TetrahedronFaces3` implements the opposite direction:
 
 ```text
 tetrahedron -> vertex
@@ -108,28 +151,12 @@ tetrahedron -> triangle
 ```
 
 Each result returns the global face class and the corresponding translated
-`FaceEmbedding` permutation, matching Regina's statement that
-`Simplex::faceMapping()` equals the relevant `FaceEmbedding::vertices()` map.
+`FaceEmbedding` permutation. Active images select the requested local face,
+occurrence counts reproduce every global face degree, and paired-facet mappings
+commute with their gluing permutations.
 
-The local numbering is Regina's standard three-dimensional numbering:
-
-- vertices `0,1,2,3`;
-- edges `01,02,03,12,13,23`;
-- triangle `i` is opposite vertex `i`.
-
-The implementation is checked in three independent ways:
-
-1. active mapping images select the requested local face;
-2. counts across all tetrahedra reproduce every global face degree;
-3. across every paired facet, the gluing permutation transports the source
-   triangle mapping to the destination triangle mapping while preserving the
-   global triangle class.
-
-For the one-tetrahedron ball the complete triangle maps are
-`[1,2,3,0]`, `[0,2,3,1]`, `[0,1,3,2]`, and the identity. Invalid tetrahedron or
-face numbers fail closed.
-
-See [`TETRAHEDRON-FACES3.md`](TETRAHEDRON-FACES3.md).
+See [`SUBFACES3.md`](SUBFACES3.md) and
+[`TETRAHEDRON-FACES3.md`](TETRAHEDRON-FACES3.md).
 
 ## Explicit vertex links and boundary surfaces
 
@@ -185,23 +212,24 @@ validity value:
 3. every real-boundary vertex has a disc link.
 
 Mathematical validity remains separate from richer reconstruction-completeness
-fields. The report now independently records whether tetrahedron face tables,
-explicit vertex links, and real-boundary orientation assignments all completed.
+fields. The report independently records whether exact edge order, tetrahedron
+face tables, explicit vertex links, and real-boundary orientation assignments
+all completed.
 
 ## Exact boundary
 
 The current work still omits:
 
 - generic all-dimensional simplex and subface APIs;
+- exact codimension-two order outside dimension three;
 - higher-dimensional face-numbering tables and link-manifold recognition;
-- exact codimension-two path/cycle appearance order;
 - Regina's packed `Perm<3>` serialization for link-triangle side gluings;
 - mutable C++ objects, pointer identity, caches, invalidation, and notification behavior;
 - triangle combinatorial-type recognition;
 - normal surfaces and hypersurfaces, homology, fundamental groups, Pachner moves, recognition, isomorphism signatures, geometry, GUI code, and native bindings.
 
-The source-shaped validity, face-property, subface, and tetrahedron-face reports
-are specific to dimension three.
+The source-shaped validity, face-property, subface, tetrahedron-face, and exact
+edge-order reports are specific to dimension three.
 
 ## Check
 
@@ -213,7 +241,7 @@ agda --safe --without-K --ignore-interfaces \
   -i agda agda/Regina/All.agda
 ```
 
-The aggregate checks **36 local modules and 210 concrete reduction
+The aggregate checks **38 local modules and 228 concrete reduction
 assertions**:
 
 - `Regina.PermutationTests`: 16;
@@ -222,9 +250,10 @@ assertions**:
 - `Regina.DualForestTests`: 10;
 - `Regina.SkeletonTests`: 15;
 - `Regina.EmbeddingTests`: 11;
+- `Regina.FaceLinkTests`: 15;
+- `Regina.ExactEdgeLinkTests`: 18;
 - `Regina.SubfaceTests`: 15;
 - `Regina.TetrahedronFaceTests`: 13;
-- `Regina.FaceLinkTests`: 15;
 - `Regina.Link3Tests`: 12;
 - `Regina.VertexLinkTests`: 8;
 - `Regina.BoundaryTests`: 7;
@@ -240,12 +269,12 @@ recorded run.
 
 Thank you to **Benjamin A. Burton**—credited as **Ben Burton** in the translated
 source headers—for Regina and the translated permutation, triangulation,
-component, orientation, skeleton, dual-forest, face-embedding, subface,
-tetrahedron-face, link, three-dimensional vertex-link, boundary-component,
-face-property, and validity algorithms. Thank you to **Ryan Budney** and
-**William Pettersson** for their work on Regina. Thank you to **Richard Rannard**
-for the figure-eight construction credited by Regina to chapter 8 of his PhD
-thesis.
+component, orientation, skeleton, dual-forest, face-embedding, exact edge-link,
+subface, tetrahedron-face, link, three-dimensional vertex-link,
+boundary-component, face-property, and validity algorithms. Thank you to
+**Ryan Budney** and **William Pettersson** for their work on Regina. Thank you to
+**Richard Rannard** for the figure-eight construction credited by Regina to
+chapter 8 of his PhD thesis.
 
 These acknowledgments do not replace Regina's complete contributor and citation
 records. The translated material follows the repository's existing
