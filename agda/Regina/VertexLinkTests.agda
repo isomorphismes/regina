@@ -1,6 +1,6 @@
 {-# OPTIONS --safe --without-K #-}
 
--- Reduction tests for explicit three-dimensional vertex-link triangulations.
+-- Reduction tests for explicit three-dimensional vertex-link complexes.
 -- Copyright (c) 1999-2026, Ben Burton / The Regina development team.
 -- GPL version 2 or later with Regina's distribution permission;
 -- see ../../LICENSE.txt. Translation changes: 2026-10-10.
@@ -11,7 +11,7 @@ open import Regina.Foundation
 open import Regina.Triangulation
 open import Regina.Examples
 open import Regina.Link3
-open import Regina.VertexLinks3
+open import Regina.VertexLinkComplex3
 
 private
   record ExplicitLinkShape : Set where
@@ -88,14 +88,14 @@ figure_eight_link_has_eight_triangles_and_euler_zero = refl
 
 ball_link_side_count_is_three_per_triangle :
   map
-    (λ currentLink → length (link_sides currentLink))
+    (λ currentLink → length (triangle_sides currentLink))
     (explicitVertexLinks (ball 3)) ≡ (3 ∷ 3 ∷ 3 ∷ 3 ∷ [])
 ball_link_side_count_is_three_per_triangle = refl
 
 sphere_link_side_count_is_three_per_triangle :
   map_outcome
     (λ currentTriangulation → map
-      (λ currentLink → length (link_sides currentLink))
+      (λ currentLink → length (triangle_sides currentLink))
       (explicitVertexLinks currentTriangulation))
     (sphere 3) ≡ accepted (6 ∷ 6 ∷ 6 ∷ 6 ∷ [])
 sphere_link_side_count_is_three_per_triangle = refl

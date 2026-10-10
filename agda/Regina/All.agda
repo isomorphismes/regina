@@ -18,7 +18,7 @@ import Regina.Skeleton
 import Regina.Embeddings
 import Regina.FaceLinks
 import Regina.Link3
-import Regina.VertexLinks3
+import Regina.VertexLinkComplex3
 import Regina.PermutationTests
 import Regina.TriangulationTests
 import Regina.ComponentTests
