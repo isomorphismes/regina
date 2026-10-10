@@ -103,38 +103,59 @@ record EmbeddingTraversal (dimension simplex_count : Nat) : Set where
     identification_conflict : Bool
 open EmbeddingTraversal public
 
+observeEmbeddingCandidateAfterLookup : Nat →
+  EmbeddingTraversal dimension simplex_count →
+  FaceEmbedding dimension simplex_count →
+  Maybe (FaceEmbedding dimension simplex_count) →
+  EmbeddingTraversal dimension simplex_count
+observeEmbeddingCandidateAfterLookup faceDimension currentTraversal candidate nothing =
+  embedding_traversal
+    (appendOne (reached_embeddings currentTraversal) candidate)
+    (appendOne (pending_embeddings currentTraversal) candidate)
+    (identification_conflict currentTraversal)
+observeEmbeddingCandidateAfterLookup faceDimension currentTraversal candidate
+  (just previous) = embedding_traversal
+    (reached_embeddings currentTraversal)
+    (pending_embeddings currentTraversal)
+    (identification_conflict currentTraversal or not
+      (prefixVerticesEqual (suc faceDimension)
+        (ordered_simplex_vertices previous)
+        (ordered_simplex_vertices candidate)))
+
 observeEmbeddingCandidate : Nat → EmbeddingTraversal dimension simplex_count →
   FaceEmbedding dimension simplex_count → EmbeddingTraversal dimension simplex_count
-observeEmbeddingCandidate faceDimension state candidate
-  with findEmbeddingForFace (embedded_local_face candidate) (reached_embeddings state)
-... | nothing = embedding_traversal
-  (appendOne (reached_embeddings state) candidate)
-  (appendOne (pending_embeddings state) candidate)
-  (identification_conflict state)
-... | just previous = embedding_traversal
-  (reached_embeddings state) (pending_embeddings state)
-  (identification_conflict state or not
-    (prefixVerticesEqual (suc faceDimension)
-      (ordered_simplex_vertices previous)
-      (ordered_simplex_vertices candidate)))
+observeEmbeddingCandidate faceDimension currentTraversal candidate =
+  observeEmbeddingCandidateAfterLookup faceDimension currentTraversal candidate
+    (findEmbeddingForFace (embedded_local_face candidate)
+      (reached_embeddings currentTraversal))
+
+processEmbeddingExitAfterCrossing : Nat →
+  EmbeddingTraversal dimension simplex_count →
+  Maybe (FaceEmbedding dimension simplex_count) →
+  EmbeddingTraversal dimension simplex_count
+processEmbeddingExitAfterCrossing faceDimension currentTraversal nothing =
+  currentTraversal
+processEmbeddingExitAfterCrossing faceDimension currentTraversal (just candidate) =
+  observeEmbeddingCandidate faceDimension currentTraversal candidate
 
 processEmbeddingExit : Triangulation dimension simplex_count → Nat →
   EmbeddingTraversal dimension simplex_count →
   FaceEmbedding dimension simplex_count → Fin (suc dimension) →
   EmbeddingTraversal dimension simplex_count
-processEmbeddingExit current faceDimension state source exitFacet
-  with crossFaceEmbedding current source exitFacet
-... | nothing = state
-... | just candidate = observeEmbeddingCandidate faceDimension state candidate
+processEmbeddingExit current faceDimension currentTraversal source exitFacet =
+  processEmbeddingExitAfterCrossing faceDimension currentTraversal
+    (crossFaceEmbedding current source exitFacet)
 
 processEmbeddingExits : Triangulation dimension simplex_count → Nat →
   EmbeddingTraversal dimension simplex_count →
   FaceEmbedding dimension simplex_count → List (Fin (suc dimension)) →
   EmbeddingTraversal dimension simplex_count
-processEmbeddingExits current faceDimension state source [] = state
-processEmbeddingExits current faceDimension state source (exitFacet ∷ remaining) =
+processEmbeddingExits current faceDimension currentTraversal source [] =
+  currentTraversal
+processEmbeddingExits current faceDimension currentTraversal source
+  (exitFacet ∷ remaining) =
   processEmbeddingExits current faceDimension
-    (processEmbeddingExit current faceDimension state source exitFacet)
+    (processEmbeddingExit current faceDimension currentTraversal source exitFacet)
     source remaining
 
 walkEmbeddingQueue : (simplexDimension faceDimension : Nat) →
@@ -142,15 +163,17 @@ walkEmbeddingQueue : (simplexDimension faceDimension : Nat) →
   Triangulation simplexDimension numberOfSimplices →
   EmbeddingTraversal simplexDimension numberOfSimplices →
   EmbeddingTraversal simplexDimension numberOfSimplices
-walkEmbeddingQueue simplexDimension faceDimension zero current state = state
-walkEmbeddingQueue simplexDimension faceDimension (suc fuel) current state
-  with pending_embeddings state
-... | [] = state
-... | source ∷ remaining = walkEmbeddingQueue simplexDimension faceDimension fuel current
-  (processEmbeddingExits current faceDimension
-    (embedding_traversal (reached_embeddings state) remaining
-      (identification_conflict state))
-    source (all_fin (suc simplexDimension)))
+walkEmbeddingQueue simplexDimension faceDimension zero current currentTraversal =
+  currentTraversal
+walkEmbeddingQueue simplexDimension faceDimension (suc fuel) current currentTraversal
+  with pending_embeddings currentTraversal
+... | [] = currentTraversal
+... | source ∷ remaining =
+  walkEmbeddingQueue simplexDimension faceDimension fuel current
+    (processEmbeddingExits current faceDimension
+      (embedding_traversal (reached_embeddings currentTraversal) remaining
+        (identification_conflict currentTraversal))
+      source (all_fin (suc simplexDimension)))
 
 record EmbeddingClass (dimension simplex_count : Nat) : Set where
   constructor embedding_class
@@ -159,15 +182,20 @@ record EmbeddingClass (dimension simplex_count : Nat) : Set where
     class_has_bad_identification : Bool
 open EmbeddingClass public
 
-embeddingClassFromSeed : Triangulation dimension simplex_count → Nat → Nat →
-  LocalFace dimension simplex_count → EmbeddingClass dimension simplex_count
-embeddingClassFromSeed {dimension} current faceDimension fuel seed
-  with initialFaceEmbedding seed
-... | firstEmbedding
+embeddingClassFromSeedAfterInitial :
+  Triangulation dimension simplex_count → Nat → Nat →
+  FaceEmbedding dimension simplex_count → EmbeddingClass dimension simplex_count
+embeddingClassFromSeedAfterInitial {dimension} current faceDimension fuel firstEmbedding
   with walkEmbeddingQueue dimension faceDimension fuel current
     (embedding_traversal (firstEmbedding ∷ []) (firstEmbedding ∷ []) false)
 ... | completed = embedding_class
   (reached_embeddings completed) (identification_conflict completed)
+
+embeddingClassFromSeed : Triangulation dimension simplex_count → Nat → Nat →
+  LocalFace dimension simplex_count → EmbeddingClass dimension simplex_count
+embeddingClassFromSeed current faceDimension fuel seed =
+  embeddingClassFromSeedAfterInitial current faceDimension fuel
+    (initialFaceEmbedding seed)
 
 faceReachedByEmbeddings : LocalFace dimension simplex_count →
   List (FaceEmbedding dimension simplex_count) → Bool

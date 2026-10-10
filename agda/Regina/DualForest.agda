@@ -41,63 +41,95 @@ record ForestState (dimension simplex_count : Nat) : Set where
     forest_edges : List (DualForestEdge dimension simplex_count)
 open ForestState public
 
+processForestFacetAfterDiscovery :
+  Triangulation dimension simplex_count →
+  Fin simplex_count → Fin (suc dimension) →
+  ForestState dimension simplex_count → Gluing dimension simplex_count → Bool →
+  ForestState dimension simplex_count
+processForestFacetAfterDiscovery current sourceSimplex localFacetNumber currentForest outward true =
+  currentForest
+processForestFacetAfterDiscovery current sourceSimplex localFacetNumber currentForest outward false =
+  forest_state
+    (appendOne (discovered_simplices currentForest) (adjacent_simplex outward))
+    (appendOne (pending_simplices currentForest) (adjacent_simplex outward))
+    (appendOne (forest_edges currentForest)
+      (dual_forest_edge (facet sourceSimplex localFacetNumber)
+        (destination (facet sourceSimplex localFacetNumber) outward)))
+
+processForestFacetAfterLookup :
+  Triangulation dimension simplex_count →
+  Fin simplex_count → Fin (suc dimension) →
+  ForestState dimension simplex_count → Maybe (Gluing dimension simplex_count) →
+  ForestState dimension simplex_count
+processForestFacetAfterLookup current sourceSimplex localFacetNumber currentForest nothing =
+  currentForest
+processForestFacetAfterLookup current sourceSimplex localFacetNumber currentForest
+  (just outward) = processForestFacetAfterDiscovery current sourceSimplex
+    localFacetNumber currentForest outward
+    (memberIndex (adjacent_simplex outward) (discovered_simplices currentForest))
+
 processForestFacet : Triangulation dimension simplex_count →
   Fin simplex_count → Fin (suc dimension) → ForestState dimension simplex_count →
   ForestState dimension simplex_count
-processForestFacet current source localFacet state
-  with adjacency (raw_state current) (facet source localFacet)
-... | nothing = state
-... | just outward
-  with memberIndex (adjacent_simplex outward) (discovered_simplices state)
-...   | true = state
-...   | false = forest_state
-  (appendOne (discovered_simplices state) (adjacent_simplex outward))
-  (appendOne (pending_simplices state) (adjacent_simplex outward))
-  (appendOne (forest_edges state)
-    (dual_forest_edge (facet source localFacet)
-      (destination (facet source localFacet) outward)))
+processForestFacet current sourceSimplex localFacetNumber currentForest =
+  processForestFacetAfterLookup current sourceSimplex localFacetNumber currentForest
+    (adjacency (raw_state current) (facet sourceSimplex localFacetNumber))
 
 processForestFacets : Triangulation dimension simplex_count →
   Fin simplex_count → List (Fin (suc dimension)) →
   ForestState dimension simplex_count → ForestState dimension simplex_count
-processForestFacets current source [] state = state
-processForestFacets current source (localFacet ∷ remaining) state =
-  processForestFacets current source remaining
-    (processForestFacet current source localFacet state)
+processForestFacets current sourceSimplex [] currentForest = currentForest
+processForestFacets current sourceSimplex (localFacetNumber ∷ remaining) currentForest =
+  processForestFacets current sourceSimplex remaining
+    (processForestFacet current sourceSimplex localFacetNumber currentForest)
 
 walkForestQueue : (simplexDimension numberOfSimplices : Nat) → Nat →
   Triangulation simplexDimension numberOfSimplices →
   ForestState simplexDimension numberOfSimplices →
   ForestState simplexDimension numberOfSimplices
-walkForestQueue simplexDimension numberOfSimplices zero current state = state
-walkForestQueue simplexDimension numberOfSimplices (suc fuel) current state
-  with pending_simplices state
-... | [] = state
-... | source ∷ remaining = walkForestQueue simplexDimension numberOfSimplices fuel current
-  (processForestFacets current source (all_fin (suc simplexDimension))
-    (forest_state (discovered_simplices state) remaining (forest_edges state)))
+walkForestQueue simplexDimension numberOfSimplices zero current currentForest = currentForest
+walkForestQueue simplexDimension numberOfSimplices (suc fuel) current currentForest
+  with pending_simplices currentForest
+... | [] = currentForest
+... | sourceSimplex ∷ remaining =
+  walkForestQueue simplexDimension numberOfSimplices fuel current
+    (processForestFacets current sourceSimplex (all_fin (suc simplexDimension))
+      (forest_state (discovered_simplices currentForest) remaining
+        (forest_edges currentForest)))
+
+startForestRootAfterMembership :
+  (simplexDimension numberOfSimplices : Nat) →
+  Triangulation simplexDimension numberOfSimplices → Nat →
+  ForestState simplexDimension numberOfSimplices → Fin numberOfSimplices → Bool →
+  ForestState simplexDimension numberOfSimplices
+startForestRootAfterMembership simplexDimension numberOfSimplices current fuel
+  currentForest root true = currentForest
+startForestRootAfterMembership simplexDimension numberOfSimplices current fuel
+  currentForest root false =
+  walkForestQueue simplexDimension numberOfSimplices fuel current
+    (forest_state
+      (appendOne (discovered_simplices currentForest) root)
+      (appendOne (pending_simplices currentForest) root)
+      (forest_edges currentForest))
 
 startForestRoot : (simplexDimension numberOfSimplices : Nat) →
   Triangulation simplexDimension numberOfSimplices → Nat →
   ForestState simplexDimension numberOfSimplices → Fin numberOfSimplices →
   ForestState simplexDimension numberOfSimplices
-startForestRoot simplexDimension numberOfSimplices current fuel state root
-  with memberIndex root (discovered_simplices state)
-... | true = state
-... | false = walkForestQueue simplexDimension numberOfSimplices fuel current
-  (forest_state
-    (appendOne (discovered_simplices state) root)
-    (appendOne (pending_simplices state) root)
-    (forest_edges state))
+startForestRoot simplexDimension numberOfSimplices current fuel currentForest root =
+  startForestRootAfterMembership simplexDimension numberOfSimplices current fuel
+    currentForest root (memberIndex root (discovered_simplices currentForest))
 
 processForestRoots : (simplexDimension numberOfSimplices : Nat) →
   Triangulation simplexDimension numberOfSimplices → Nat →
   ForestState simplexDimension numberOfSimplices → List (Fin numberOfSimplices) →
   ForestState simplexDimension numberOfSimplices
-processForestRoots simplexDimension numberOfSimplices current fuel state [] = state
-processForestRoots simplexDimension numberOfSimplices current fuel state (root ∷ remaining) =
+processForestRoots simplexDimension numberOfSimplices current fuel currentForest [] =
+  currentForest
+processForestRoots simplexDimension numberOfSimplices current fuel currentForest
+  (root ∷ remaining) =
   processForestRoots simplexDimension numberOfSimplices current fuel
-    (startForestRoot simplexDimension numberOfSimplices current fuel state root)
+    (startForestRoot simplexDimension numberOfSimplices current fuel currentForest root)
     remaining
 
 dualForestState : Triangulation dimension simplex_count → ForestState dimension simplex_count
@@ -135,8 +167,8 @@ parentFacetOf current target = findParent (dualForestEdges current)
   findParent : List (DualForestEdge dimension simplex_count) →
     Maybe (Facet dimension simplex_count)
   findParent [] = nothing
-  findParent (edge ∷ remaining)
-    with fin_equal target (simplex_number (child_facet edge))
+  findParent (edge ∷ remaining) with
+    fin_equal target (simplex_number (child_facet edge))
   ... | true = just (parent_facet edge)
   ... | false = findParent remaining
 
@@ -147,7 +179,7 @@ childFacetOf current target = findChild (dualForestEdges current)
   findChild : List (DualForestEdge dimension simplex_count) →
     Maybe (Facet dimension simplex_count)
   findChild [] = nothing
-  findChild (edge ∷ remaining)
-    with fin_equal target (simplex_number (child_facet edge))
+  findChild (edge ∷ remaining) with
+    fin_equal target (simplex_number (child_facet edge))
   ... | true = just (child_facet edge)
   ... | false = findChild remaining
