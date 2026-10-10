@@ -24,6 +24,7 @@ Source baseline:
 | [`Regina.Link3`](Regina/Link3.agda) | Three-dimensional vertex-link Euler characteristics and finite, real-boundary, or ideal classification. |
 | [`Regina.VertexLinkSurface3`](Regina/VertexLinkSurface3.agda) | Explicit triangle surfaces for three-dimensional vertex links, with addressed side pairings and endpoint-labelled corners. |
 | [`Regina.Boundary3`](Regina/Boundary3.agda) | Real boundary components from unpaired facets and ideal boundary components from explicit vertex links. |
+| [`Regina.BoundaryClassification3`](Regina/BoundaryClassification3.agda) | Real-boundary orientation propagation and closed-surface classification by orientability and Euler characteristic. |
 | [`Regina.All`](Regina/All.agda) | Aggregate entry point for all implementation and reduction-test modules. |
 
 Source maps:
@@ -33,7 +34,8 @@ Source maps:
 - [`SKELETON-SOURCE-MAP.tsv`](SKELETON-SOURCE-MAP.tsv): lower-dimensional face quotient;
 - [`FOREST-EMBEDDINGS-SOURCE-MAP.tsv`](FOREST-EMBEDDINGS-SOURCE-MAP.tsv): dual forest and ordered embeddings;
 - [`FACE-LINKS-SOURCE-MAP.tsv`](FACE-LINKS-SOURCE-MAP.tsv): orientation-normalised face links and three-dimensional Euler data;
-- [`VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv`](VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv): explicit vertex-link surfaces and boundary components.
+- [`VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv`](VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv): explicit vertex-link surfaces and boundary components;
+- [`BOUNDARY-ORIENTATION-SOURCE-MAP.tsv`](BOUNDARY-ORIENTATION-SOURCE-MAP.tsv): real-boundary orientation and surface classification.
 
 ## Certified gluing core
 
@@ -52,7 +54,7 @@ tetrahedron are paired by `[3,0,1,2]`; the reverse map is `[1,2,3,0]`.
 Different facets of one simplex may be paired. A facet may not be paired with
 itself.
 
-## Components, faces, and return maps
+## Components, faces, and links
 
 Top-dimensional simplices form a finite adjacency graph through paired facets.
 Finite closure partitions them into connected components. An even facet
@@ -73,34 +75,22 @@ non-trivial face self-identification and a nonorientable link return.
 
 ## Explicit three-dimensional vertex links
 
-`Regina.VertexLinkSurface3` translates the object built by
-`Face<3,0>::buildLink()`:
+For every global vertex, `Regina.VertexLinkSurface3` builds one link triangle
+per tetrahedron-vertex occurrence. Each link-triangle side records either a
+boundary edge or the addressed side of the adjacent occurrence, together with
+the transported endpoint labels. Every paired side is checked to resolve and to
+point back reciprocally.
 
-1. Every tetrahedron-vertex occurrence of a global vertex becomes one link
-   triangle.
-2. Each of its three possible exit facets becomes one triangle side.
-3. An unpaired tetrahedron facet becomes a boundary side of the link.
-4. A paired tetrahedron facet identifies the side with the corresponding side
-   of the triangle belonging to the adjacent tetrahedron-vertex occurrence.
-5. The gluing permutation transports both side endpoints.
-
-Each link side stores its source address, optional destination address, and
-transported endpoint labels. The checker confirms that every non-boundary side
-has a target and that following the target side returns to the original side.
-
-Link triangle corners are labelled by
+A link corner is labelled by
 
 ```text
-(global edge class, endpoint 0 or endpoint 1)
+(global original edge class, endpoint 0 or endpoint 1)
 ```
 
-instead of merely by the global edge class. This distinction is necessary for
-loop edges: the two ends of one global edge can represent two different
-vertices of the link. The endpoint number comes from the ordered global-edge
-embedding, so corner labels retain exactly the endpoint information needed for
-the link surface.
+so the two ends of a loop edge remain distinct when they represent different
+vertices of the link.
 
-The explicit surfaces recover:
+The explicit cell counts are:
 
 | Original triangulation | Link triangles | Link vertices | Link edges | Boundary edges | Euler characteristic |
 |---|---:|---:|---:|---:|---:|
@@ -109,41 +99,50 @@ The explicit surfaces recover:
 | 3D ball-bundle vertex | 4 | 6 | 9 | 6 | 1 |
 | figure-eight ideal vertex | 8 | 4 | 12 | 0 | 0 |
 
-Thus the earlier Euler-only observations are now backed by explicit finite
-triangle complexes: discs for the ball and ball bundle, 2-spheres for the
-sphere example, and an eight-triangle Euler-zero torus link for the figure-eight
-triangulation.
+Thus the source-style Euler calculations are independently recovered from
+explicit finite triangle surfaces.
 
 ## Real and ideal boundary components
 
 `Regina.Boundary3` keeps Regina's two boundary mechanisms distinct.
 
-A **real boundary component** is assembled from global triangle classes whose
-tetrahedron facets are unpaired. Two boundary triangles belong to the same
-component when they meet along a global boundary edge. Finite closure partitions
-the boundary triangles, and each component records its unique global vertices,
-global edges, triangles, and Euler characteristic.
+A real boundary component is a connected collection of unpaired global facets,
+where adjacency is through shared global boundary edges. An ideal boundary
+component is the explicit link surface of an ideal global vertex.
 
-An **ideal boundary component** is supplied by each ideal global vertex. Its
-cell counts, Euler characteristic, and orientability come directly from the
-explicit vertex-link surface.
+`Regina.BoundaryClassification3` now computes real-boundary orientation instead
+of leaving it unknown. Each boundary triangle receives the canonical cyclic
+edge directions
 
-Checked boundary structures are:
+```text
+(v1,v2), (v2,v0), (v0,v1).
+```
 
-| Triangulation | Boundary result |
+Every directed side is compared with the ordered endpoint convention of its
+global edge class. Across a shared edge, equal canonical directions require the
+neighboring triangle orientation to flip; opposite directions preserve it.
+Finite reachability in the doubled graph `(boundary facet, sign)` detects a
+conflicting return and therefore nonorientability. The analysis refuses to
+classify orientation unless all side labels resolve and every boundary edge has
+exactly two incident side occurrences.
+
+A connected closed surface is then classified from orientation and Euler
+characteristic:
+
+- orientable: `χ = 2 - 2g`;
+- nonorientable: `χ = 2 - k`.
+
+Checked boundary results:
+
+| Triangulation | Derived boundary classification |
 |---|---|
-| `ball 3` | one real component with `(V,E,F)=(4,6,4)` and `χ=2` |
+| `ball 3` | one real orientable sphere, `(V,E,F)=(4,6,4)`, `χ=2`, genus 0 |
 | `sphere 3` | no boundary components |
-| 3D ball bundle | one real component with `(V,E,F)=(1,3,2)` and `χ=0` |
-| figure-eight knot complement | one ideal orientable component with `(V,E,F)=(4,12,8)` and `χ=0` |
+| 3D ball bundle | one real orientable torus, `(V,E,F)=(1,3,2)`, `χ=0`, genus 1 |
+| figure-eight knot complement | one ideal orientable torus, `(V,E,F)=(4,12,8)`, `χ=0`, genus 1 |
 
-Real-boundary orientability is not yet calculated. Such components carry an
-explicit `boundary_orientation_computed = false`; this is not silently treated
-as a mathematical nonorientability result. Ideal-component orientability is
-computed from the face-link return maps.
-
-See [`VERTEX-LINKS-BOUNDARY.md`](VERTEX-LINKS-BOUNDARY.md) for the construction
-and exact representation boundary.
+See [`BOUNDARY-ORIENTATION.md`](BOUNDARY-ORIENTATION.md) for the exact
+orientation compatibility rule and failure boundary.
 
 ## Exact boundary
 
@@ -151,8 +150,8 @@ The current work still omits:
 
 - Regina's standard-dimension face-number lookup tables and legacy embedding labels;
 - exact codimension-two path/cycle appearance order;
-- Regina's exact `Perm<3>` serialization for link-triangle edge gluings;
-- orientation propagation across real boundary triangles;
+- Regina's packed `Perm<3>` serialization for link-triangle side gluings;
+- explicit orientation labels exported on every real boundary face;
 - higher-dimensional link-manifold recognition and bad-link flags;
 - the complete `isValid()` implementation;
 - normal surfaces and hypersurfaces, homology, fundamental groups, Pachner moves, recognition, isomorphism signatures, geometry, GUI code, and native bindings.
@@ -171,7 +170,7 @@ agda --safe --without-K --ignore-interfaces \
   -i agda agda/Regina/All.agda
 ```
 
-The aggregate checks **24 local modules and 151 concrete reduction
+The aggregate checks **26 local modules and 159 concrete reduction
 assertions**:
 
 - `Regina.PermutationTests`: 16;
@@ -183,7 +182,8 @@ assertions**:
 - `Regina.FaceLinkTests`: 15;
 - `Regina.Link3Tests`: 12;
 - `Regina.VertexLinkTests`: 8;
-- `Regina.BoundaryTests`: 7.
+- `Regina.BoundaryTests`: 7;
+- `Regina.BoundaryOrientationTests`: 8.
 
 See [`VERIFICATION.txt`](VERIFICATION.txt) and the branch workflow for the
 recorded run.
