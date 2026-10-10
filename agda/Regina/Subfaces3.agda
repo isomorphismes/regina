@@ -210,14 +210,21 @@ singleVertexSelection vertexNumber containingVertices
 ... | nothing = nothing
 ... | just selectedVertex = just (selectedVertex ∷ [])
 
+triangleEdgeSelectionFromNumber : Nat → Fin 4 → Fin 4 → Fin 4 →
+  Maybe (List (Fin 4))
+triangleEdgeSelectionFromNumber zero vertexZero vertexOne vertexTwo =
+  just (vertexOne ∷ vertexTwo ∷ [])
+triangleEdgeSelectionFromNumber (suc zero) vertexZero vertexOne vertexTwo =
+  just (vertexZero ∷ vertexTwo ∷ [])
+triangleEdgeSelectionFromNumber (suc (suc zero)) vertexZero vertexOne vertexTwo =
+  just (vertexZero ∷ vertexOne ∷ [])
+triangleEdgeSelectionFromNumber (suc (suc (suc remainingNumber)))
+  vertexZero vertexOne vertexTwo = nothing
+
 triangleEdgeSelection : Nat → List (Fin 4) → Maybe (List (Fin 4))
 triangleEdgeSelection edgeNumber
-  (vertexZero ∷ vertexOne ∷ vertexTwo ∷ remainingVertices)
-  with edgeNumber
-... | zero = just (vertexOne ∷ vertexTwo ∷ [])
-... | suc zero = just (vertexZero ∷ vertexTwo ∷ [])
-... | suc (suc zero) = just (vertexZero ∷ vertexOne ∷ [])
-... | suc (suc (suc remainingNumber)) = nothing
+  (vertexZero ∷ vertexOne ∷ vertexTwo ∷ remainingVertices) =
+  triangleEdgeSelectionFromNumber edgeNumber vertexZero vertexOne vertexTwo
 triangleEdgeSelection edgeNumber vertices = nothing
 
 referenceAfterSelection : Nat →
