@@ -14,6 +14,7 @@ open import Regina.Foundation
 open import Regina.Triangulation
 open import Regina.FaceLinks
 import Regina.Components as Components
+import Regina.ExactEdgeLinks3 as ExactEdges
 import Regina.Link3 as Link3
 import Regina.TetrahedronFaces3 as TetrahedronFaces
 import Regina.VertexLinkSurface3 as VertexLinks
@@ -76,6 +77,15 @@ threeDimensionalValidityValue currentTriangulation =
   edgeIdentificationsValid currentTriangulation and
   realBoundaryVertexLinksValid currentTriangulation
 
+exactEdgeLinkAnalysisComplete : {simplex_count : Nat} →
+  Triangulation 3 simplex_count → Bool
+exactEdgeLinkAnalysisComplete currentTriangulation =
+  ExactEdges.allOrderedEdgeWalksComplete currentTriangulation and
+  ExactEdges.orderedEdgeOccurrencesComplete currentTriangulation and
+  ExactEdges.allOrderedEdgeStructuresValid currentTriangulation and
+  ExactEdges.allOrderedMappingsMatchSimplexOrientations currentTriangulation and
+  ExactEdges.allOrderedEdgeClassesMatchGeneric currentTriangulation
+
 tetrahedronFaceAnalysisComplete : {simplex_count : Nat} →
   Triangulation 3 simplex_count → Bool
 tetrahedronFaceAnalysisComplete currentTriangulation =
@@ -117,6 +127,7 @@ record ThreeDimensionalValidityReport : Set where
     report_triangulation_orientable : Bool
     report_triangulation_ideal : Bool
     report_triangulation_standard : Bool
+    report_exact_edge_link_order_complete : Bool
     report_tetrahedron_face_mappings_complete : Bool
     report_explicit_vertex_links_complete : Bool
     report_real_boundary_orientations_complete : Bool
@@ -134,6 +145,7 @@ threeDimensionalValidityReport currentTriangulation =
     (Components.triangulationOrientable currentTriangulation)
     (Link3.threeDimensionalIsIdeal currentTriangulation)
     (Link3.threeDimensionalIsStandard currentTriangulation)
+    (exactEdgeLinkAnalysisComplete currentTriangulation)
     (tetrahedronFaceAnalysisComplete currentTriangulation)
     (explicitVertexLinkAnalysisComplete currentTriangulation)
     (realBoundaryOrientationAnalysisComplete currentTriangulation)
