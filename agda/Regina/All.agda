@@ -18,7 +18,7 @@ import Regina.DualForest
 import Regina.Skeleton
 import Regina.Embeddings
 import Regina.FaceLinks
-import Regina.Subfaces3
+import Regina.SubfaceIncidence3
 import Regina.Link3
 import Regina.VertexLinkSurface3
 import Regina.Boundary3
