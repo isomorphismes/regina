@@ -1,23 +1,25 @@
 REGINA AGDA TRANSLATION — AGGREGATE VERIFICATION
 
-Checked at: 2026-10-10 00:18:56 UTC
+Checked at: 2026-10-10 00:42:47 UTC
 Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
-Verified implementation commit: 4bb1ea4554dc62f459c1fa2ef36cda53447d541e
+Verified implementation commit: e751612d37d64808917edc5ec3800d4c25c3ae21
 Branch: Agda
-Workflow run: https://github.com/isomorphisms/regina/actions/runs/38008450328
+Workflow run: https://github.com/isomorphisms/regina/actions/runs/38010149235
 Target: GitHub-hosted Ubuntu 24.04 amd64
 Compiler: Agda 2.6.3
 
 Aggregate check: PASS
 Exit code: 0
-Local Agda modules checked: 16
-Concrete reduction assertions: 109
+Local Agda modules checked: 20
+Concrete reduction assertions: 136
   Regina.PermutationTests: 16
   Regina.TriangulationTests: 48
   Regina.ComponentTests: 9
   Regina.DualForestTests: 10
   Regina.SkeletonTests: 15
   Regina.EmbeddingTests: 11
+  Regina.FaceLinkTests: 15
+  Regina.Link3Tests: 12
 
 Command:
 agda --safe --without-K --ignore-interfaces --no-libraries --no-default-libraries -i agda agda/Regina/All.agda
@@ -26,11 +28,15 @@ The run checked every implementation module and every test equality with fresh
 interfaces. No Agda standard library or user-installed Agda library was loaded.
 Computation was exercised by Agda reduction.
 
-The newly checked slice includes Regina's deterministic dual spanning forest,
-explicit ordered local-face appearances, and selected-face-prefix detection of
-non-trivial self-identifications. The receipt does not claim exact equality of
-Regina's standard-dimension embedding labels, orientation-normalized complement
-order, codimension-two appearance order, link construction, link orientability,
-bad-link detection, real boundary components, full manifold validity, compiled
-GHC execution, C++ differential testing, complete Regina API coverage, or
-Regina's performance characteristics.
+The newly checked slice includes orientation-normalised face traversals,
+codimension-specific return-map checks, link-orientation detection from
+complementary permutations, and Regina's three-dimensional vertex-link Euler
+calculation. The examples distinguish real-boundary disc links, finite
+2-sphere links, and the Euler-zero ideal link of the figure-eight triangulation.
+
+This receipt does not claim exact equality with Regina's standard-dimension
+embedding labels, exact codimension-two appearance order, explicit link
+triangulations, higher-dimensional link-manifold recognition, real
+boundary-component construction, the complete isValid() contract, compiled GHC
+execution, C++ differential testing, complete Regina API coverage, or Regina's
+performance characteristics.
