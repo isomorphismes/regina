@@ -33,10 +33,10 @@ collectMaskVertices : {numberOfVertices : Nat} →
   Vector Bool numberOfVertices → Bool → List (Fin numberOfVertices) →
   List (Fin numberOfVertices)
 collectMaskVertices mask selectedValue [] = []
-collectMaskVertices mask selectedValue (vertex ∷ remaining)
-  with bool_equal (lookup_vector mask vertex) selectedValue
-... | true = vertex ∷ collectMaskVertices mask selectedValue remaining
-... | false = collectMaskVertices mask selectedValue remaining
+collectMaskVertices mask selectedValue (currentVertex ∷ remainingVertices)
+  with bool_equal (lookup_vector mask currentVertex) selectedValue
+... | true = currentVertex ∷ collectMaskVertices mask selectedValue remainingVertices
+... | false = collectMaskVertices mask selectedValue remainingVertices
 
 -- FaceNumbering::ordering() always places face vertices first and in increasing
 -- order. Regina permits an arbitrary order for the complement. This Agda
