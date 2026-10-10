@@ -687,21 +687,29 @@ embeddingOrderingEven currentEmbedding = not
     (map fin_to_nat
       (Embeddings.ordered_simplex_vertices currentEmbedding)))
 
-embeddingMatchesSimplexOrientation :
+embeddingOrientationMatchesLookup :
+  Embeddings.FaceEmbedding 3 simplex_count →
+  Maybe Components.Orientation → Bool
+embeddingOrientationMatchesLookup currentEmbedding nothing = false
+embeddingOrientationMatchesLookup currentEmbedding
+  (just Components.positive) = embeddingOrderingEven currentEmbedding
+embeddingOrientationMatchesLookup currentEmbedding
+  (just Components.negative) = not (embeddingOrderingEven currentEmbedding)
+
+orderedEmbeddingMatchesOrientation :
   List (SimplexOrientationLabel3 simplex_count) →
   Embeddings.FaceEmbedding 3 simplex_count → Bool
-embeddingMatchesSimplexOrientation labels currentEmbedding
-  with orientationForSimplex
-    (face_simplex (Embeddings.embedded_local_face currentEmbedding)) labels
-... | nothing = false
-... | just Components.positive = embeddingOrderingEven currentEmbedding
-... | just Components.negative = not (embeddingOrderingEven currentEmbedding)
+orderedEmbeddingMatchesOrientation orientationLabels currentEmbedding =
+  embeddingOrientationMatchesLookup currentEmbedding
+    (orientationForSimplex
+      (face_simplex (Embeddings.embedded_local_face currentEmbedding))
+      orientationLabels)
 
 allOrderedMappingsMatchSimplexOrientations :
   Triangulation 3 simplex_count → Bool
 allOrderedMappingsMatchSimplexOrientations currentTriangulation = all
   (λ currentClass → all
-    (embeddingMatchesSimplexOrientation
+    (orderedEmbeddingMatchesOrientation
       (simplexOrientationLabels3 currentTriangulation))
     (ordered_edge_embeddings currentClass))
   (orderedEdgeLinks3 currentTriangulation)
