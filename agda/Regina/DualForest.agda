@@ -49,8 +49,8 @@ processForestFacet current source localFacet state
 ... | nothing = state
 ... | just outward
   with memberIndex (adjacent_simplex outward) (discovered_simplices state)
-... | true = state
-... | false = forest_state
+...   | true = state
+...   | false = forest_state
   (appendOne (discovered_simplices state) (adjacent_simplex outward))
   (appendOne (pending_simplices state) (adjacent_simplex outward))
   (appendOne (forest_edges state)
