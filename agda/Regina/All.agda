@@ -4,8 +4,8 @@
 
 -- Check the translated finite core, examples, components, dual forest,
 -- face quotient and embeddings, face-link diagnostics, explicit vertex links,
--- boundary structure and labels, reasoned three-dimensional validity, and all
--- reduction tests.
+-- boundary structure and labels, per-face API properties, reasoned validity,
+-- and all reduction tests.
 module Regina.All where
 
 import Regina.Foundation
@@ -23,6 +23,7 @@ import Regina.VertexLinkSurface3
 import Regina.Boundary3
 import Regina.BoundaryClassification3
 import Regina.BoundaryLabels3
+import Regina.FaceProperties3
 import Regina.Validity3
 import Regina.PermutationTests
 import Regina.TriangulationTests
@@ -36,4 +37,5 @@ import Regina.VertexLinkTests
 import Regina.BoundaryTests
 import Regina.BoundaryOrientationTests
 import Regina.BoundaryLabelTests
+import Regina.FacePropertyTests
 import Regina.ValidityTests
