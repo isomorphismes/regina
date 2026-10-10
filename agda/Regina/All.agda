@@ -3,9 +3,9 @@
 -- Agda translation changes: 2026-10-10. License: ../../LICENSE.txt.
 
 -- Check the translated finite core, examples, components, dual forest,
--- face quotient and embeddings, face-link diagnostics, explicit vertex links,
--- boundary structure and labels, per-face API properties, reasoned validity,
--- and all reduction tests.
+-- face quotient and embeddings, subface lookup and mappings, face-link
+-- diagnostics, explicit vertex links, boundary structure and labels,
+-- per-face API properties, reasoned validity, and all reduction tests.
 module Regina.All where
 
 import Regina.Foundation
@@ -18,6 +18,7 @@ import Regina.DualForest
 import Regina.Skeleton
 import Regina.Embeddings
 import Regina.FaceLinks
+import Regina.Subfaces3
 import Regina.Link3
 import Regina.VertexLinkSurface3
 import Regina.Boundary3
@@ -31,6 +32,7 @@ import Regina.ComponentTests
 import Regina.DualForestTests
 import Regina.SkeletonTests
 import Regina.EmbeddingTests
+import Regina.SubfaceTests
 import Regina.FaceLinkTests
 import Regina.Link3Tests
 import Regina.VertexLinkTests
