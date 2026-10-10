@@ -1,17 +1,18 @@
 REGINA AGDA TRANSLATION — AGGREGATE VERIFICATION
 
-Checked at: 2026-10-10 02:50:14 UTC
+Checked at: 2026-10-10 03:48:37 UTC
 Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
-Verified implementation commit: f72b4d5a4c8e74a5aa7dda6eb6705893001abd79
+Verified implementation commit: 78edddb3373b47487577118678ea0821053e43b5
+Delivery repository: https://github.com/isomorphismes/regina
 Branch: Agda
-Workflow run: https://github.com/isomorphisms/regina/actions/runs/38018370552
+Workflow run: https://github.com/isomorphismes/regina/actions/runs/38021819581
 Target: GitHub-hosted Ubuntu 24.04 amd64
 Compiler: Agda 2.6.3
 
 Aggregate check: PASS
 Exit code: 0
-Local Agda modules checked: 30
-Concrete reduction assertions: 169
+Local Agda modules checked: 32
+Concrete reduction assertions: 182
   Regina.PermutationTests: 16
   Regina.TriangulationTests: 48
   Regina.ComponentTests: 9
@@ -24,6 +25,7 @@ Concrete reduction assertions: 169
   Regina.BoundaryTests: 7
   Regina.BoundaryOrientationTests: 8
   Regina.BoundaryLabelTests: 4
+  Regina.FacePropertyTests: 13
   Regina.ValidityTests: 6
 
 Command:
@@ -33,19 +35,20 @@ The run checked every implementation module and every test equality with fresh
 interfaces. No Agda standard library or user-installed Agda library was loaded.
 Computation was exercised by Agda reduction.
 
-The newly checked slice exports one canonical sign for every real-boundary
-facet relative to a positive component root. Conflict and unreachable states
-remain explicit, and an assignment is complete only when every facet has one
-unique sign after all incidence checks pass.
+The newly checked slice translates dimension-three Face API observations. It
+reproduces the exact invalidity codes 0, 1 and 2 and their combined code 3;
+reports face degree, link orientation, boundary and internal status; records
+closed, ideal and standard vertex links and their Euler characteristics; and
+connects global triangles to the previously translated maximal dual forest.
 
-It also replaces the earlier undifferentiated local-validity Boolean with a
-source-shaped three-dimensional report. The report separately checks reciprocal
-facet data, reversed-edge identifications, and invalid real-boundary vertex
-links, and returns named invalidity reasons. Ideal, standard, orientability and
-additional reconstruction-completeness observations remain separate fields.
+The tests distinguish real-boundary disc vertices, internal sphere-link
+vertices, the closed ideal figure-eight vertex, degree-one boundary edges,
+degree-two internal edges, a reversed edge carrying INVALID_IDENTIFICATION, and
+a malformed real-boundary vertex carrying INVALID_LINK.
 
-This receipt does not claim the mutable C++ face-object cache or exact
-whyInvalid() bit storage, higher-dimensional link-manifold recognition, the
-generic all-dimensions isValid() implementation, compiled GHC execution, C++
+This receipt does not claim C++ face pointer identity, mutable cache lifetime,
+component or boundary-component pointers, exact codimension-two appearance
+order, subface mapping APIs, triangle combinatorial-type recognition,
+higher-dimensional face specialisations, compiled GHC execution, C++
 differential testing, complete Regina API coverage, or Regina's performance
 characteristics.
