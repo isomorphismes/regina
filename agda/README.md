@@ -24,6 +24,7 @@ history moved with the repository transfer.
 | [`Regina.Skeleton`](Regina/Skeleton.agda) | Quotient classes of local vertices, edges, and all other proper faces. |
 | [`Regina.Embeddings`](Regina/Embeddings.agda) | Ordered local-face appearances and non-trivial self-identification detection. |
 | [`Regina.FaceLinks`](Regina/FaceLinks.agda) | Orientation-normalised face returns, codimension-specific bad-identification tests, and link orientability. |
+| [`Regina.SubfaceIncidence3`](Regina/SubfaceIncidence3.agda) | Dimension-three `Face::face()` and active `faceMapping()` semantics for edge endpoints and triangle vertices and edges. |
 | [`Regina.Link3`](Regina/Link3.agda) | Three-dimensional vertex-link Euler characteristics and finite, real-boundary, or ideal classification. |
 | [`Regina.VertexLinkSurface3`](Regina/VertexLinkSurface3.agda) | Explicit triangle surfaces for three-dimensional vertex links, with addressed side pairings and endpoint-labelled corners. |
 | [`Regina.Boundary3`](Regina/Boundary3.agda) | Real boundary components from unpaired facets and ideal boundary components from explicit vertex links. |
@@ -40,6 +41,7 @@ Source maps:
 - [`SKELETON-SOURCE-MAP.tsv`](SKELETON-SOURCE-MAP.tsv): lower-dimensional face quotient;
 - [`FOREST-EMBEDDINGS-SOURCE-MAP.tsv`](FOREST-EMBEDDINGS-SOURCE-MAP.tsv): dual forest and ordered embeddings;
 - [`FACE-LINKS-SOURCE-MAP.tsv`](FACE-LINKS-SOURCE-MAP.tsv): orientation-normalised face links and three-dimensional Euler data;
+- [`SUBFACES3-SOURCE-MAP.tsv`](SUBFACES3-SOURCE-MAP.tsv): dimension-three subface lookup, mappings, and incidences;
 - [`VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv`](VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv): explicit vertex-link surfaces and boundary components;
 - [`BOUNDARY-ORIENTATION-SOURCE-MAP.tsv`](BOUNDARY-ORIENTATION-SOURCE-MAP.tsv): real-boundary orientation and surface classification;
 - [`VALIDITY3-SOURCE-MAP.tsv`](VALIDITY3-SOURCE-MAP.tsv): exported boundary-facet labels and the three-dimensional validity report;
@@ -80,6 +82,41 @@ finite closure produces global face classes. Ordered embeddings retain the
 complete local vertex order. `Regina.FaceLinks` applies Regina's complementary
 orientation convention before crossings and keeps separate flags for a
 non-trivial face self-identification and a nonorientable link return.
+
+## Dimension-three subfaces
+
+`Regina.SubfaceIncidence3` provides the fixed-dimension subface operations that
+are most useful in a three-dimensional triangulation:
+
+```text
+edge -> vertex
+triangle -> vertex
+triangle -> edge
+```
+
+Each result contains the global lower-face class and a certified `Perm<4>`.
+The first `lowerdim + 1` images map the lower face's inherent vertex labels into
+the containing face's inherent labels, matching Regina's documented
+`faceMapping()` contract. The unused images are completed deterministically
+with the remaining labels in increasing order; this tail is not claimed to
+match Regina because the source declares it semantically unspecified.
+
+The inherent numbering is checked by reduction:
+
+- edge endpoints map to positions `0` and `1`;
+- triangle vertices map to `0`, `1`, and `2`;
+- triangle edge `0` occupies positions `{1,2}`;
+- triangle edge `1` occupies `{0,2}`;
+- triangle edge `2` occupies `{0,1}`.
+
+The distinction between a returned global face and its mapping matters for loop
+edges. In the figure-eight triangulation, both endpoints of each global edge
+return the same global vertex class, but the active mapping images remain `0`
+and `1`. Incidence observations therefore count endpoint and corner roles with
+multiplicity instead of collapsing them to set membership.
+
+See [`SUBFACES3.md`](SUBFACES3.md) for the full fixed-dimension contract and
+checked incidence tables.
 
 ## Explicit vertex links and boundary surfaces
 
@@ -194,14 +231,16 @@ The current work still omits:
 - exact codimension-two path/cycle appearance order;
 - Regina's packed `Perm<3>` serialization for link-triangle side gluings;
 - mutable C++ face objects, pointer identity, component pointers, cache invalidation, and notification behavior;
-- the full `Face::face()` and `Face::faceMapping()` subface APIs;
+- tetrahedron-to-proper-face lookup through the `Face` API and the generic all-dimensional subface family;
+- Regina's choices for semantically unused tail images of `faceMapping()`;
 - triangle combinatorial-type recognition;
 - higher-dimensional link-manifold recognition and validity;
 - normal surfaces and hypersurfaces, homology, fundamental groups, Pachner moves, recognition, isomorphism signatures, geometry, GUI code, and native bindings.
 
-The source-shaped validity and face-property reports are specific to dimension
-three. They do not claim the complete generic `Triangulation<dim>::isValid()` or
-all-dimensional `Face<dim,subdim>` implementation.
+The source-shaped validity, face-property, and subface reports are specific to
+dimension three. They do not claim the complete generic
+`Triangulation<dim>::isValid()` or all-dimensional `Face<dim,subdim>`
+implementation.
 
 ## Check
 
@@ -213,7 +252,7 @@ agda --safe --without-K --ignore-interfaces \
   -i agda agda/Regina/All.agda
 ```
 
-The aggregate checks **32 local modules and 182 concrete reduction
+The aggregate checks **34 local modules and 197 concrete reduction
 assertions**:
 
 - `Regina.PermutationTests`: 16;
@@ -222,6 +261,7 @@ assertions**:
 - `Regina.DualForestTests`: 10;
 - `Regina.SkeletonTests`: 15;
 - `Regina.EmbeddingTests`: 11;
+- `Regina.SubfaceTests`: 15;
 - `Regina.FaceLinkTests`: 15;
 - `Regina.Link3Tests`: 12;
 - `Regina.VertexLinkTests`: 8;
@@ -238,7 +278,7 @@ recorded run.
 
 Thank you to **Benjamin A. Burton**—credited as **Ben Burton** in the translated
 source headers—for Regina and the translated permutation, triangulation,
-component, orientation, skeleton, dual-forest, face-embedding, link,
+component, orientation, skeleton, dual-forest, face-embedding, subface, link,
 three-dimensional vertex-link, boundary-component, face-property, and validity
 algorithms. Thank you to **Ryan Budney** and **William Pettersson** for their work
 on Regina. Thank you to **Richard Rannard** for the figure-eight construction
