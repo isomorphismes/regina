@@ -7,7 +7,7 @@ port or a replacement for Regina's C++ engine.
 Source baseline:
 [`regina-normal/regina@e3a5c7c0e0581706d9e5531b750160b322489950`](https://github.com/regina-normal/regina/commit/e3a5c7c0e0581706d9e5531b750160b322489950).
 
-The working fork now lives at `isomorphismes/regina`; the `Agda` branch and its
+The working fork lives at `isomorphismes/regina`; the `Agda` branch and its
 history moved with the repository transfer.
 
 ## Implemented modules
@@ -25,13 +25,14 @@ history moved with the repository transfer.
 | [`Regina.Embeddings`](Regina/Embeddings.agda) | Ordered local-face appearances and non-trivial self-identification detection. |
 | [`Regina.FaceLinks`](Regina/FaceLinks.agda) | Orientation-normalised face returns, codimension-specific bad-identification tests, and link orientability. |
 | [`Regina.SubfaceIncidence3`](Regina/SubfaceIncidence3.agda) | Dimension-three `Face::face()` and active `faceMapping()` semantics for edge endpoints and triangle vertices and edges. |
+| [`Regina.TetrahedronFaces3`](Regina/TetrahedronFaces3.agda) | Dimension-three `Simplex::face()` and `Simplex::faceMapping()` semantics for tetrahedron vertices, edges, and triangles. |
 | [`Regina.Link3`](Regina/Link3.agda) | Three-dimensional vertex-link Euler characteristics and finite, real-boundary, or ideal classification. |
 | [`Regina.VertexLinkSurface3`](Regina/VertexLinkSurface3.agda) | Explicit triangle surfaces for three-dimensional vertex links, with addressed side pairings and endpoint-labelled corners. |
 | [`Regina.Boundary3`](Regina/Boundary3.agda) | Real boundary components from unpaired facets and ideal boundary components from explicit vertex links. |
 | [`Regina.BoundaryClassification3`](Regina/BoundaryClassification3.agda) | Real-boundary orientation propagation and closed-surface classification. |
 | [`Regina.BoundaryLabels3`](Regina/BoundaryLabels3.agda) | Canonical positive or negative orientation labels for every real-boundary facet, plus explicit conflict and unresolved states. |
 | [`Regina.FaceProperties3`](Regina/FaceProperties3.agda) | Dimension-three `Face` API observations: invalidity bits, boundary/internal/link properties, ideal and standard vertices, degrees, Euler characteristics, and maximal-forest triangles. |
-| [`Regina.Validity3`](Regina/Validity3.agda) | A reasoned source-shaped three-dimensional validity report and separate translation-completeness diagnostics. |
+| [`Regina.Validity3`](Regina/Validity3.agda) | A reasoned dimension-three validity report plus separate reconstruction-completeness diagnostics. |
 | [`Regina.All`](Regina/All.agda) | Aggregate entry point for all implementation and reduction-test modules. |
 
 Source maps:
@@ -41,10 +42,11 @@ Source maps:
 - [`SKELETON-SOURCE-MAP.tsv`](SKELETON-SOURCE-MAP.tsv): lower-dimensional face quotient;
 - [`FOREST-EMBEDDINGS-SOURCE-MAP.tsv`](FOREST-EMBEDDINGS-SOURCE-MAP.tsv): dual forest and ordered embeddings;
 - [`FACE-LINKS-SOURCE-MAP.tsv`](FACE-LINKS-SOURCE-MAP.tsv): orientation-normalised face links and three-dimensional Euler data;
-- [`SUBFACES3-SOURCE-MAP.tsv`](SUBFACES3-SOURCE-MAP.tsv): dimension-three subface lookup, mappings, and incidences;
+- [`SUBFACES3-SOURCE-MAP.tsv`](SUBFACES3-SOURCE-MAP.tsv): dimension-three face-to-subface lookup, mappings, and incidences;
+- [`TETRAHEDRON-FACES3-SOURCE-MAP.tsv`](TETRAHEDRON-FACES3-SOURCE-MAP.tsv): dimension-three tetrahedron face tables and mappings;
 - [`VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv`](VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv): explicit vertex-link surfaces and boundary components;
 - [`BOUNDARY-ORIENTATION-SOURCE-MAP.tsv`](BOUNDARY-ORIENTATION-SOURCE-MAP.tsv): real-boundary orientation and surface classification;
-- [`VALIDITY3-SOURCE-MAP.tsv`](VALIDITY3-SOURCE-MAP.tsv): exported boundary-facet labels and the three-dimensional validity report;
+- [`VALIDITY3-SOURCE-MAP.tsv`](VALIDITY3-SOURCE-MAP.tsv): exported boundary-facet labels and the dimension-three validity report;
 - [`FACE-PROPERTIES3-SOURCE-MAP.tsv`](FACE-PROPERTIES3-SOURCE-MAP.tsv): the dimension-three face-property layer.
 
 ## Certified gluing core
@@ -59,12 +61,7 @@ paired facet, the checker establishes that the other side returns to the source
 simplex, uses the inverse vertex map, names a different facet, and carries the
 same facet lock.
 
-For Regina's three-dimensional ball bundle, facet 0 and facet 3 of one
-tetrahedron are paired by `[3,0,1,2]`; the reverse map is `[1,2,3,0]`.
-Different facets of one simplex may be paired. A facet may not be paired with
-itself.
-
-## Components, faces, and links
+## Components, global faces, and links
 
 Top-dimensional simplices form a finite adjacency graph through paired facets.
 Finite closure partitions them into connected components. An even facet
@@ -83,10 +80,9 @@ complete local vertex order. `Regina.FaceLinks` applies Regina's complementary
 orientation convention before crossings and keeps separate flags for a
 non-trivial face self-identification and a nonorientable link return.
 
-## Dimension-three subfaces
+## Face-to-subface lookup
 
-`Regina.SubfaceIncidence3` provides the fixed-dimension subface operations that
-are most useful in a three-dimensional triangulation:
+`Regina.SubfaceIncidence3` provides the fixed-dimension lower-face operations:
 
 ```text
 edge -> vertex
@@ -96,27 +92,44 @@ triangle -> edge
 
 Each result contains the global lower-face class and a certified `Perm<4>`.
 The first `lowerdim + 1` images map the lower face's inherent vertex labels into
-the containing face's inherent labels, matching Regina's documented
-`faceMapping()` contract. The unused images are completed deterministically
-with the remaining labels in increasing order; this tail is not claimed to
-match Regina because the source declares it semantically unspecified.
+the containing face's inherent labels. Loop edges retain distinct endpoint
+mappings even when both endpoints return the same global vertex.
 
-The inherent numbering is checked by reduction:
+See [`SUBFACES3.md`](SUBFACES3.md).
 
-- edge endpoints map to positions `0` and `1`;
-- triangle vertices map to `0`, `1`, and `2`;
-- triangle edge `0` occupies positions `{1,2}`;
-- triangle edge `1` occupies `{0,2}`;
-- triangle edge `2` occupies `{0,1}`.
+## Tetrahedron face lookup
 
-The distinction between a returned global face and its mapping matters for loop
-edges. In the figure-eight triangulation, both endpoints of each global edge
-return the same global vertex class, but the active mapping images remain `0`
-and `1`. Incidence observations therefore count endpoint and corner roles with
-multiplicity instead of collapsing them to set membership.
+`Regina.TetrahedronFaces3` implements the other incidence direction:
 
-See [`SUBFACES3.md`](SUBFACES3.md) for the full fixed-dimension contract and
-checked incidence tables.
+```text
+tetrahedron -> vertex
+tetrahedron -> edge
+tetrahedron -> triangle
+```
+
+Each result returns the global face class and the corresponding translated
+`FaceEmbedding` permutation, matching Regina's statement that
+`Simplex::faceMapping()` equals the relevant `FaceEmbedding::vertices()` map.
+
+The local numbering is Regina's standard three-dimensional numbering:
+
+- vertices `0,1,2,3`;
+- edges `01,02,03,12,13,23`;
+- triangle `i` is opposite vertex `i`.
+
+The implementation is checked in three independent ways:
+
+1. active mapping images select the requested local face;
+2. counts across all tetrahedra reproduce every global face degree;
+3. across every paired facet, the gluing permutation transports the source
+   triangle mapping to the destination triangle mapping while preserving the
+   global triangle class.
+
+For the one-tetrahedron ball the complete triangle maps are
+`[1,2,3,0]`, `[0,2,3,1]`, `[0,1,3,2]`, and the identity. Invalid tetrahedron or
+face numbers fail closed.
+
+See [`TETRAHEDRON-FACES3.md`](TETRAHEDRON-FACES3.md).
 
 ## Explicit vertex links and boundary surfaces
 
@@ -126,13 +139,8 @@ boundary edge or the addressed side of the adjacent occurrence, together with
 the transported endpoint labels. Every paired side is checked to resolve and to
 point back reciprocally.
 
-A link corner is labelled by
-
-```text
-(global original edge class, endpoint 0 or endpoint 1)
-```
-
-so the two ends of a loop edge remain distinct when they represent different
+A link corner is labelled by `(global original edge class, endpoint number)`, so
+the two ends of a loop edge remain distinct when they represent different
 vertices of the link.
 
 | Original triangulation | Link triangles | Link vertices | Link edges | Boundary edges | Euler characteristic |
@@ -150,17 +158,18 @@ characteristic.
 
 | Triangulation | Derived boundary classification |
 |---|---|
-| `ball 3` | one real orientable sphere, `(V,E,F)=(4,6,4)`, `χ=2`, genus 0 |
+| `ball 3` | one real orientable sphere, `(V,E,F)=(4,6,4)`, `chi=2`, genus 0 |
 | `sphere 3` | no boundary components |
-| 3D ball bundle | one real orientable torus, `(V,E,F)=(1,3,2)`, `χ=0`, genus 1 |
-| figure-eight knot complement | one ideal orientable torus, `(V,E,F)=(4,12,8)`, `χ=0`, genus 1 |
+| 3D ball bundle | one real orientable torus, `(V,E,F)=(1,3,2)`, `chi=0`, genus 1 |
+| figure-eight knot complement | one ideal orientable torus, `(V,E,F)=(4,12,8)`, `chi=0`, genus 1 |
 
-## Dimension-three `Face` properties
+## Dimension-three face properties and validity
 
-`Regina.FaceProperties3` presents the translated skeleton results through the
-shape of Regina's public `Face<3,subdim>` API.
+`Regina.FaceProperties3` presents degree, boundary/internal status, link
+properties, exact invalidity bits, ideal and standard vertex status, Euler
+characteristics, and maximal-forest triangle membership.
 
-The private `whyInvalid_` constants are represented exactly:
+The exact invalidity values are:
 
 ```text
 VALID                  = 0
@@ -168,79 +177,31 @@ INVALID_IDENTIFICATION = 1
 INVALID_LINK           = 2
 ```
 
-The two failure bits may coexist, yielding code `3`. The immutable Agda record
-exposes `isValid`, `hasBadIdentification`, and `hasBadLink` observations without
-copying Regina's mutable face-object cache.
-
-For every vertex, edge, and triangle the module records:
-
-- face-class index and degree;
-- link orientability;
-- incidence with real boundary;
-- `isBoundary` and `isInternal`;
-- invalid-identification and invalid-link bits.
-
-Vertices additionally record:
-
-- whether the link is closed;
-- ideal and standard status;
-- link Euler characteristic;
-- a normalised two-bit code for ideal and real-boundary status.
-
-The last code uses Regina's published values `1` and `2`, but is an Agda
-observation over the dimension-three API. Regina's C++ `vertexFlags_` field is
-physically instantiated only for four-dimensional vertices at this source
-revision.
-
-The distinction between boundary and closed link is preserved. A figure-eight
-ideal vertex is both `isBoundary = true` and `isLinkClosed = true`; a real
-boundary vertex has an open disc link. `isInternal` is exactly validity
-conjoined with the negation of `isBoundary`.
-
-For codimension-one faces, the module also exposes membership in the maximal
-dual forest. The sphere and figure-eight examples each have one global triangle
-selected by the forest, while the one-tetrahedron ball has none.
-
-See [`FACE-PROPERTIES3.md`](FACE-PROPERTIES3.md) for the checked observations and
-representation boundary.
-
-## Three-dimensional validity
-
-`Regina.Validity3` packages the checks that set Regina's three-dimensional
-`valid_` flag at the pinned source revision:
+`Regina.Validity3` packages the checks that set Regina's dimension-three
+validity value:
 
 1. reciprocal facet adjacency and inverse gluing permutations;
 2. no global edge identified with itself in reverse;
-3. every vertex lying in a real boundary facet has link Euler characteristic
-   `1`, as required for a disc link.
+3. every real-boundary vertex has a disc link.
 
-A non-boundary vertex with link Euler characteristic `2` is finite. Any other
-non-boundary vertex is ideal; it remains valid because Regina allows arbitrary
-closed 2-manifold vertex links in dimension three. The separate `standard`
-flag requires an ideal link to have Euler characteristic `0`.
-
-The report keeps mathematical validity separate from reconstruction
-completeness for explicit vertex-link cells and real-boundary orientation
-assignments.
+Mathematical validity remains separate from richer reconstruction-completeness
+fields. The report now independently records whether tetrahedron face tables,
+explicit vertex links, and real-boundary orientation assignments all completed.
 
 ## Exact boundary
 
 The current work still omits:
 
-- Regina's standard-dimension face-number lookup tables and legacy embedding labels;
+- generic all-dimensional simplex and subface APIs;
+- higher-dimensional face-numbering tables and link-manifold recognition;
 - exact codimension-two path/cycle appearance order;
 - Regina's packed `Perm<3>` serialization for link-triangle side gluings;
-- mutable C++ face objects, pointer identity, component pointers, cache invalidation, and notification behavior;
-- tetrahedron-to-proper-face lookup through the `Face` API and the generic all-dimensional subface family;
-- Regina's choices for semantically unused tail images of `faceMapping()`;
+- mutable C++ objects, pointer identity, caches, invalidation, and notification behavior;
 - triangle combinatorial-type recognition;
-- higher-dimensional link-manifold recognition and validity;
 - normal surfaces and hypersurfaces, homology, fundamental groups, Pachner moves, recognition, isomorphism signatures, geometry, GUI code, and native bindings.
 
-The source-shaped validity, face-property, and subface reports are specific to
-dimension three. They do not claim the complete generic
-`Triangulation<dim>::isValid()` or all-dimensional `Face<dim,subdim>`
-implementation.
+The source-shaped validity, face-property, subface, and tetrahedron-face reports
+are specific to dimension three.
 
 ## Check
 
@@ -252,7 +213,7 @@ agda --safe --without-K --ignore-interfaces \
   -i agda agda/Regina/All.agda
 ```
 
-The aggregate checks **34 local modules and 197 concrete reduction
+The aggregate checks **36 local modules and 210 concrete reduction
 assertions**:
 
 - `Regina.PermutationTests`: 16;
@@ -262,6 +223,7 @@ assertions**:
 - `Regina.SkeletonTests`: 15;
 - `Regina.EmbeddingTests`: 11;
 - `Regina.SubfaceTests`: 15;
+- `Regina.TetrahedronFaceTests`: 13;
 - `Regina.FaceLinkTests`: 15;
 - `Regina.Link3Tests`: 12;
 - `Regina.VertexLinkTests`: 8;
@@ -278,11 +240,12 @@ recorded run.
 
 Thank you to **Benjamin A. Burton**—credited as **Ben Burton** in the translated
 source headers—for Regina and the translated permutation, triangulation,
-component, orientation, skeleton, dual-forest, face-embedding, subface, link,
-three-dimensional vertex-link, boundary-component, face-property, and validity
-algorithms. Thank you to **Ryan Budney** and **William Pettersson** for their work
-on Regina. Thank you to **Richard Rannard** for the figure-eight construction
-credited by Regina to chapter 8 of his PhD thesis.
+component, orientation, skeleton, dual-forest, face-embedding, subface,
+tetrahedron-face, link, three-dimensional vertex-link, boundary-component,
+face-property, and validity algorithms. Thank you to **Ryan Budney** and
+**William Pettersson** for their work on Regina. Thank you to **Richard Rannard**
+for the figure-eight construction credited by Regina to chapter 8 of his PhD
+thesis.
 
 These acknowledgments do not replace Regina's complete contributor and citation
 records. The translated material follows the repository's existing

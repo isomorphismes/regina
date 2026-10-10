@@ -1,18 +1,18 @@
 REGINA AGDA TRANSLATION — AGGREGATE VERIFICATION
 
-Checked at: 2026-10-10 04:22:57 UTC
+Checked at: 2026-10-10 11:25:20 UTC
 Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
-Verified implementation commit: 5b269d95a283bd7ef538ee9757dc76b32812113a
+Verified implementation commit: 833b42b65de974850de1cc488d29496977aaae24
 Delivery repository: https://github.com/isomorphismes/regina
 Branch: Agda
-Workflow run: https://github.com/isomorphismes/regina/actions/runs/38023806695
+Workflow run: https://github.com/isomorphismes/regina/actions/runs/38048277555
 Target: GitHub-hosted Ubuntu 24.04 amd64
 Compiler: Agda 2.6.3
 
 Aggregate check: PASS
 Exit code: 0
-Local Agda modules checked: 34
-Concrete reduction assertions: 197
+Local Agda modules checked: 36
+Concrete reduction assertions: 210
   Regina.PermutationTests: 16
   Regina.TriangulationTests: 48
   Regina.ComponentTests: 9
@@ -20,6 +20,7 @@ Concrete reduction assertions: 197
   Regina.SkeletonTests: 15
   Regina.EmbeddingTests: 11
   Regina.SubfaceTests: 15
+  Regina.TetrahedronFaceTests: 13
   Regina.FaceLinkTests: 15
   Regina.Link3Tests: 12
   Regina.VertexLinkTests: 8
@@ -36,24 +37,25 @@ The run checked every implementation module and every test equality with fresh
 interfaces. No Agda standard library or user-installed Agda library was loaded.
 Computation was exercised by Agda reduction.
 
-The newly checked slice translates the useful dimension-three part of
-Face::face() and Face::faceMapping(): edge endpoints, triangle vertices, and
-triangle edges. Every successful lookup returns the global lower-face class and
-a certified Perm<4>. Its first lowerdim+1 images map the lower face's inherent
-vertex labels into the containing face's inherent labels. The remaining images
-are completed deterministically and are not claimed to match Regina, which
-documents them as semantically unspecified.
+The newly checked slice translates the dimension-three top-simplex face tables:
+tetrahedron-to-vertex, tetrahedron-to-edge, and tetrahedron-to-triangle lookup,
+together with the corresponding `Simplex::faceMapping()` permutations. Every
+successful lookup returns a global face-class number and the checked `Perm<4>`
+from its translated ordered face occurrence.
 
-The reductions verify total lookup and inherent numbering for the ball, sphere,
-ball-bundle, and figure-eight examples. They recover tetrahedral incidence
-counts, preserve incidence multiplicity, identify both figure-eight edges as
-loops, and show that each loop's two endpoint references return the same global
-vertex class while retaining distinct active mapping images 0 and 1.
+The reductions verify Regina's local vertex, edge, and triangle numbering,
+exact complete triangle mappings for a single tetrahedron, active mapping
+images for all six edge numbers, and fail-closed invalid indices. They also
+cross-check the implementation against independent layers: local occurrence
+counts reproduce all global face degrees, and every paired-facet triangle
+mapping commutes with its tetrahedron gluing permutation.
 
-This receipt does not claim the generic all-dimensional Face::face() family,
-tetrahedron-to-proper-face lookup through the Face API, Regina-identical unused
-mapping images, mutable C++ face pointers or cached subface arrays, exact
-codimension-two appearance order, triangle combinatorial-type recognition,
-higher-dimensional face specialisations, compiled GHC execution, C++
-differential testing, complete Regina API coverage, or Regina's performance
-characteristics.
+The validity report now exposes this as a separate reconstruction-completeness
+field. The mathematical dimension-three validity value is unchanged.
+
+This receipt does not claim the generic all-dimensional Simplex::face() family,
+higher-dimensional face-numbering tables, mutable C++ simplex face arrays,
+Regina's cache or notification behavior, exact codimension-two appearance
+order, triangle combinatorial-type recognition, higher-dimensional face
+specialisations, compiled GHC execution, C++ differential testing, complete
+Regina API coverage, or Regina's performance characteristics.

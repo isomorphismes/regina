@@ -1,15 +1,16 @@
-# Three-dimensional validity and boundary-facet labels
+# Three-dimensional validity and reconstruction completeness
 
 `Regina.Validity3` gives a source-shaped, reasoned account of the validity
-checks performed during Regina's three-dimensional skeleton calculation.
-`Regina.BoundaryLabels3` exposes the concrete facet orientations that the
-preceding boundary-orientation work had used only internally.
+checks performed during Regina's three-dimensional skeleton calculation. It
+also reports whether the richer immutable Agda reconstructions—tetrahedron face
+tables, explicit vertex links, and real-boundary orientations—completed without
+an unresolved incidence.
 
 Source baseline: `e3a5c7c0e0581706d9e5531b750160b322489950`.
 
 ## Regina's three-dimensional validity checks
 
-The general Regina documentation describes two kinds of failure:
+The general Regina documentation describes two kinds of face failure:
 
 1. a face is identified with itself under a non-identity permutation;
 2. a face has an inappropriate link.
@@ -71,42 +72,57 @@ true only when every ideal vertex link has Euler characteristic `0`.
 - the conjunction used as the three-dimensional validity value;
 - triangulation orientability;
 - ideal and standard flags;
+- tetrahedron face-table and mapping completeness;
 - explicit vertex-link analysis completeness;
 - real-boundary orientation-assignment completeness;
 - a list of named invalidity reasons.
 
-The additional completeness fields are not smuggled into mathematical
-validity. They report whether the richer Agda representations—explicit link
-corners and side addresses, reciprocal link-side pairings, and concrete
-boundary-facet signs—were fully reconstructed.
+The completeness fields are not included in mathematical validity. They report
+whether richer translated structures were reconstructed in full.
+
+### Tetrahedron face-table completeness
+
+`report_tetrahedron_face_mappings_complete` requires all of the following:
+
+1. every tetrahedron vertex, edge, and triangle lookup resolves;
+2. each active mapping prefix selects the requested local face;
+3. occurrence counts from all tetrahedron tables equal the global face degrees;
+4. every paired-facet triangle mapping commutes with its gluing permutation.
+
+This field connects Regina's simplex-local `face()` and `faceMapping()` tables
+to the independently translated global skeleton. It remains separate from
+`report_validity_value`: an incomplete translation report must not silently
+change the mathematical predicate being translated.
+
+### Explicit link and boundary completeness
+
+The explicit-link field requires every link corner and side address to resolve
+and every paired side to be reciprocal. The boundary-orientation field requires
+every real-boundary facet to receive one unique sign after the incidence checks
+pass.
 
 ## Concrete boundary-facet labels
 
-Regina's real-boundary BFS stores one integer orientation on every boundary
-facet. Agda previously used the equivalent doubled graph only to decide whether
-a component was orientable.
-
-`Regina.BoundaryLabels3` now chooses the same positive root convention and
-exports one status for every facet:
+`Regina.BoundaryLabels3` chooses Regina's positive root convention and exports
+one status for every real-boundary facet:
 
 - `boundary_facet_positive`;
 - `boundary_facet_negative`;
 - `boundary_facet_conflicting` when both signs are reachable;
 - `boundary_facet_unreachable` when the incidence data is unresolved.
 
-An assignment is complete only when all facet signs are unique. The checked
-ball boundary assigns four facets, and the ball-bundle boundary assigns two;
-both assignments are complete, rooted positively, orientable, and
+The checked ball boundary assigns four facets, and the ball-bundle boundary
+assigns two. Both assignments are complete, rooted positively, orientable, and
 conflict-free. Closed and ideal-only examples have no real-boundary assignment.
 
 ## Checked reports
 
-| Triangulation | Valid | Orientable | Ideal | Standard | Extra analyses complete |
-|---|---:|---:|---:|---:|---:|
-| one tetrahedron | yes | yes | no | yes | yes |
-| two identity-glued tetrahedra | yes | yes | no | yes | yes |
-| 3D ball bundle | yes | yes | no | yes | yes |
-| figure-eight complement | yes | yes | yes | yes | yes |
+| Triangulation | Valid | Orientable | Ideal | Standard | Tetrahedron tables | Explicit links | Boundary signs |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| one tetrahedron | yes | yes | no | yes | complete | complete | complete |
+| two identity-glued tetrahedra | yes | yes | no | yes | complete | complete | complete |
+| 3D ball bundle | yes | yes | no | yes | complete | complete | complete |
+| figure-eight complement | yes | yes | yes | yes | complete | complete | complete |
 
 The reversed-edge fixture fails validity and contains the explicit reason
 `reversed_edge_identification`.
