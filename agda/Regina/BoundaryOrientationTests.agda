@@ -12,7 +12,7 @@ open import Regina.Triangulation
 open import Regina.Examples
 open import Regina.Link3
 open import Regina.Boundary3
-open import Regina.BoundarySurface3
+open import Regina.BoundarySurfaceChecked3
 
 private
   record SurfaceObservation : Set where
