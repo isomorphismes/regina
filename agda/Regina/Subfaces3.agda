@@ -64,25 +64,25 @@ completeMappingFromActiveImages : List Nat → Maybe (Permutation 4)
 completeMappingFromActiveImages activeImages = from_image_list 4
   (activeImages ++ filterNatsNotUsed activeImages allFourVertexNumbers)
 
-positionOfVertexFrom : Nat → Fin 4 → List (Fin 4) → Maybe Nat
-positionOfVertexFrom currentPosition targetVertex [] = nothing
-positionOfVertexFrom currentPosition targetVertex
+locateContainingVertexFrom : Nat → Fin 4 → List (Fin 4) → Maybe Nat
+locateContainingVertexFrom currentPosition targetVertex [] = nothing
+locateContainingVertexFrom currentPosition targetVertex
   (candidateVertex ∷ remainingVertices)
   with fin_equal targetVertex candidateVertex
 ... | true = just currentPosition
-... | false = positionOfVertexFrom (suc currentPosition)
+... | false = locateContainingVertexFrom (suc currentPosition)
   targetVertex remainingVertices
 
-positionOfVertex : Fin 4 → List (Fin 4) → Maybe Nat
-positionOfVertex targetVertex vertices =
-  positionOfVertexFrom zero targetVertex vertices
+locateContainingVertex : Fin 4 → List (Fin 4) → Maybe Nat
+locateContainingVertex targetVertex vertices =
+  locateContainingVertexFrom zero targetVertex vertices
 
 mapVerticesToPositions : List (Fin 4) → List (Fin 4) →
   Maybe (List Nat)
 mapVerticesToPositions [] containingVertices = just []
 mapVerticesToPositions (currentVertex ∷ remainingVertices)
   containingVertices
-  with positionOfVertex currentVertex containingVertices |
+  with locateContainingVertex currentVertex containingVertices |
        mapVerticesToPositions remainingVertices containingVertices
 ... | just currentPosition | just remainingPositions =
   just (currentPosition ∷ remainingPositions)
