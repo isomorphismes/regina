@@ -1,17 +1,17 @@
 REGINA AGDA TRANSLATION — AGGREGATE VERIFICATION
 
-Checked at: 2026-10-10 00:42:47 UTC
+Checked at: 2026-10-10 01:16:19 UTC
 Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
-Verified implementation commit: e751612d37d64808917edc5ec3800d4c25c3ae21
+Verified implementation commit: eb28b578622ed2f85105b27d02fac85ecaf5e72a
 Branch: Agda
-Workflow run: https://github.com/isomorphisms/regina/actions/runs/38010149235
+Workflow run: https://github.com/isomorphisms/regina/actions/runs/38012451094
 Target: GitHub-hosted Ubuntu 24.04 amd64
 Compiler: Agda 2.6.3
 
 Aggregate check: PASS
 Exit code: 0
-Local Agda modules checked: 20
-Concrete reduction assertions: 136
+Local Agda modules checked: 24
+Concrete reduction assertions: 151
   Regina.PermutationTests: 16
   Regina.TriangulationTests: 48
   Regina.ComponentTests: 9
@@ -20,6 +20,8 @@ Concrete reduction assertions: 136
   Regina.EmbeddingTests: 11
   Regina.FaceLinkTests: 15
   Regina.Link3Tests: 12
+  Regina.VertexLinkTests: 8
+  Regina.BoundaryTests: 7
 
 Command:
 agda --safe --without-K --ignore-interfaces --no-libraries --no-default-libraries -i agda agda/Regina/All.agda
@@ -28,15 +30,21 @@ The run checked every implementation module and every test equality with fresh
 interfaces. No Agda standard library or user-installed Agda library was loaded.
 Computation was exercised by Agda reduction.
 
-The newly checked slice includes orientation-normalised face traversals,
-codimension-specific return-map checks, link-orientation detection from
-complementary permutations, and Regina's three-dimensional vertex-link Euler
-calculation. The examples distinguish real-boundary disc links, finite
-2-sphere links, and the Euler-zero ideal link of the figure-eight triangulation.
+The newly checked slice builds explicit two-dimensional vertex-link surfaces in
+dimension three. It creates one triangle per tetrahedron-vertex occurrence,
+records every boundary or paired side, checks reciprocal side addresses, and
+labels corners by original edge class and endpoint. The resulting V-E+F counts
+independently recover the disc, sphere, ball-bundle and figure-eight link Euler
+characteristics.
 
-This receipt does not claim exact equality with Regina's standard-dimension
-embedding labels, exact codimension-two appearance order, explicit link
-triangulations, higher-dimensional link-manifold recognition, real
-boundary-component construction, the complete isValid() contract, compiled GHC
-execution, C++ differential testing, complete Regina API coverage, or Regina's
-performance characteristics.
+The aggregate also constructs real boundary components from connected unpaired
+facets and ideal boundary components from explicit ideal-vertex links. The
+checked examples recover one real 2-sphere for the ball, no boundary for the
+sphere, one real Euler-zero torus for the ball bundle, and one ideal orientable
+torus for the figure-eight complement.
+
+This receipt does not claim Regina-compatible packed link-edge permutation
+serialization, real-boundary orientation propagation, higher-dimensional link
+manifold recognition, the complete isValid() contract, compiled GHC execution,
+C++ differential testing, complete Regina API coverage, or Regina's performance
+characteristics.
