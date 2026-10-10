@@ -33,6 +33,22 @@ private
     (allTriangleVertexNumberingValid currentTriangulation)
     (allTriangleEdgeNumberingValid currentTriangulation)
 
+  triangleContainsReportedVertex : {simplex_count : Nat} →
+    Triangulation 3 simplex_count → Nat → Maybe SubfaceReference3 → Bool
+  triangleContainsReportedVertex currentTriangulation triangleClassNumber
+    nothing = false
+  triangleContainsReportedVertex currentTriangulation triangleClassNumber
+    (just currentReference) = triangleContainsVertexClass currentTriangulation
+    triangleClassNumber (referenced_face_class_number currentReference)
+
+  triangleContainsReportedEdge : {simplex_count : Nat} →
+    Triangulation 3 simplex_count → Nat → Maybe SubfaceReference3 → Bool
+  triangleContainsReportedEdge currentTriangulation triangleClassNumber
+    nothing = false
+  triangleContainsReportedEdge currentTriangulation triangleClassNumber
+    (just currentReference) = triangleContainsEdgeClass currentTriangulation
+    triangleClassNumber (referenced_face_class_number currentReference)
+
 ball_subfaces_and_mappings_resolve :
   observeResolution (ball 3) ≡
     resolution_summary true true true true true true
@@ -118,14 +134,8 @@ figure_eight_edge_incidences_match_edge_degrees :
 figure_eight_edge_incidences_match_edge_degrees = refl
 
 ball_first_triangle_contains_its_reported_subfaces :
-  triangleContainsVertexClass (ball 3) 0
-    (referenced_face_class_number
-      (extractReference (triangleVertexReference (ball 3) 0 0))) and
-  triangleContainsEdgeClass (ball 3) 0
-    (referenced_face_class_number
-      (extractReference (triangleEdgeReference (ball 3) 0 0))) ≡ true
+  triangleContainsReportedVertex (ball 3) 0
+    (triangleVertexReference (ball 3) 0 0) and
+  triangleContainsReportedEdge (ball 3) 0
+    (triangleEdgeReference (ball 3) 0 0) ≡ true
 ball_first_triangle_contains_its_reported_subfaces = refl
-  where
-  extractReference : Maybe SubfaceReference3 → SubfaceReference3
-  extractReference (just currentReference) = currentReference
-  extractReference nothing = subface_reference_three 0 0 identity
