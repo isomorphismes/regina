@@ -25,30 +25,30 @@ private
     orientationNumber Components.positive = 1
     orientationNumber Components.negative = 0
 
+  mapMaybeFinList : Maybe (List (Fin 4)) → Maybe (List Nat)
+  mapMaybeFinList nothing = nothing
+  mapMaybeFinList (just vertices) = just (map fin_to_nat vertices)
+
   evenOrderingTables : List (Maybe (List Nat))
   evenOrderingTables = map
     (λ edgeNumber → mapMaybeFinList (evenEdgeOrdering edgeNumber))
     (0 ∷ 1 ∷ 2 ∷ 3 ∷ 4 ∷ 5 ∷ [])
-    where
-    mapMaybeFinList : Maybe (List (Fin 4)) → Maybe (List Nat)
-    mapMaybeFinList nothing = nothing
-    mapMaybeFinList (just vertices) = just (map fin_to_nat vertices)
+
+  shapeIsPath : EdgeLinkShape3 → Bool
+  shapeIsPath edge_link_path = true
+  shapeIsPath edge_link_cycle = false
+  shapeIsPath edge_link_incomplete = false
 
   allPathShapes : List EdgeLinkShape3 → Bool
   allPathShapes = all shapeIsPath
-    where
-    shapeIsPath : EdgeLinkShape3 → Bool
-    shapeIsPath edge_link_path = true
-    shapeIsPath edge_link_cycle = false
-    shapeIsPath edge_link_incomplete = false
+
+  shapeIsCycle : EdgeLinkShape3 → Bool
+  shapeIsCycle edge_link_path = false
+  shapeIsCycle edge_link_cycle = true
+  shapeIsCycle edge_link_incomplete = false
 
   allCycleShapes : List EdgeLinkShape3 → Bool
   allCycleShapes = all shapeIsCycle
-    where
-    shapeIsCycle : EdgeLinkShape3 → Bool
-    shapeIsCycle edge_link_path = false
-    shapeIsCycle edge_link_cycle = true
-    shapeIsCycle edge_link_incomplete = false
 
   exactLayerComplete : {simplex_count : Nat} →
     Triangulation 3 simplex_count → Bool
@@ -58,6 +58,41 @@ private
     allOrderedEdgeStructuresValid currentTriangulation and
     allOrderedMappingsMatchSimplexOrientations currentTriangulation and
     allOrderedEdgeClassesMatchGeneric currentTriangulation
+
+  record BoundaryEndpointObservation : Set where
+    constructor boundary_endpoint_observation
+    field
+      observed_first_boundaries : List (Maybe Nat)
+      observed_last_boundaries : List (Maybe Nat)
+
+  observeBoundaryEndpoints : {simplex_count : Nat} →
+    Triangulation 3 simplex_count → BoundaryEndpointObservation
+  observeBoundaryEndpoints currentTriangulation =
+    boundary_endpoint_observation
+      (orderedEdgeFirstBoundaryNumbers currentTriangulation)
+      (orderedEdgeLastBoundaryNumbers currentTriangulation)
+
+  record DegreeShapeObservation : Set where
+    constructor degree_shape_observation
+    field
+      observed_edge_degrees : List Nat
+      observed_shape_test : Bool
+
+  observePaths : {simplex_count : Nat} →
+    Triangulation 3 simplex_count → DegreeShapeObservation
+  observePaths currentTriangulation = degree_shape_observation
+    (orderedEdgeDegrees currentTriangulation)
+    (allPathShapes (orderedEdgeShapes currentTriangulation))
+
+  observeCycles : {simplex_count : Nat} →
+    Triangulation 3 simplex_count → DegreeShapeObservation
+  observeCycles currentTriangulation = degree_shape_observation
+    (orderedEdgeDegrees currentTriangulation)
+    (allCycleShapes (orderedEdgeShapes currentTriangulation))
+
+  positiveNatural : Nat → Bool
+  positiveNatural zero = false
+  positiveNatural (suc remaining) = true
 
   reversedEdgePair : Outcome (Triangulation 3 1)
   reversedEdgePair = from_input_gluings false 3 1
@@ -109,12 +144,9 @@ ball_edge_embedding_tables_match_source_ordering :
 ball_edge_embedding_tables_match_source_ordering = refl
 
 ball_edge_path_end_facets_are_directed :
-  orderedEdgeFirstBoundaryNumbers (ball 3) ≡
+  observeBoundaryEndpoints (ball 3) ≡ boundary_endpoint_observation
     (just 3 ∷ just 1 ∷ just 2 ∷ just 3 ∷ just 0 ∷ just 1 ∷ [])
-  and
-  orderedEdgeLastBoundaryNumbers (ball 3) ≡
     (just 2 ∷ just 3 ∷ just 1 ∷ just 0 ∷ just 2 ∷ just 0 ∷ [])
-  ≡ true
 ball_edge_path_end_facets_are_directed = refl
 
 ball_exact_edge_layer_is_complete :
@@ -151,28 +183,17 @@ sphere_exact_edge_layer_is_complete :
 sphere_exact_edge_layer_is_complete = refl
 
 ball_bundle_has_three_degree_two_edge_paths :
-  map_outcome
-    (λ currentTriangulation →
-      orderedEdgeDegrees currentTriangulation ∷
-      (ifPathShapes (orderedEdgeShapes currentTriangulation) ∷ []))
-    three_dimensional_ball_bundle ≡
-      accepted ((2 ∷ 2 ∷ 2 ∷ []) ∷ (true ∷ []))
+  map_outcome observePaths three_dimensional_ball_bundle ≡
+    accepted (degree_shape_observation (2 ∷ 2 ∷ 2 ∷ []) true)
 ball_bundle_has_three_degree_two_edge_paths = refl
-  where
-  ifPathShapes : List EdgeLinkShape3 → Bool
-  ifPathShapes = allPathShapes
 
 ball_bundle_exact_edge_layer_is_complete :
   map_outcome exactLayerComplete three_dimensional_ball_bundle ≡ accepted true
 ball_bundle_exact_edge_layer_is_complete = refl
 
 figure_eight_has_two_degree_six_edge_cycles :
-  map_outcome
-    (λ currentTriangulation →
-      orderedEdgeDegrees currentTriangulation ∷
-      (allCycleShapes (orderedEdgeShapes currentTriangulation) ∷ []))
-    figure_eight_knot_complement ≡
-      accepted ((6 ∷ 6 ∷ []) ∷ (true ∷ []))
+  map_outcome observeCycles figure_eight_knot_complement ≡
+    accepted (degree_shape_observation (6 ∷ 6 ∷ []) true)
 figure_eight_has_two_degree_six_edge_cycles = refl
 
 figure_eight_exact_edge_layer_is_complete :
@@ -181,8 +202,7 @@ figure_eight_exact_edge_layer_is_complete = refl
 
 reversed_edge_identification_is_preserved_by_exact_walk :
   map_outcome
-    (λ currentTriangulation →
-      less_than zero
-        (orderedEdgeBadIdentificationCount currentTriangulation))
+    (λ currentTriangulation → positiveNatural
+      (orderedEdgeBadIdentificationCount currentTriangulation))
     reversedEdgePair ≡ accepted true
 reversed_edge_identification_is_preserved_by_exact_walk = refl
