@@ -2,9 +2,9 @@
 
 `Regina.Validity3` gives a source-shaped, reasoned account of the validity
 checks performed during Regina's three-dimensional skeleton calculation. It
-also reports whether the richer immutable Agda reconstructions—tetrahedron face
-tables, explicit vertex links, and real-boundary orientations—completed without
-an unresolved incidence.
+also reports whether the richer immutable Agda reconstructions—exact ordered
+edge links, tetrahedron face tables, explicit vertex links, and real-boundary
+orientations—completed without an unresolved incidence.
 
 Source baseline: `e3a5c7c0e0581706d9e5531b750160b322489950`.
 
@@ -40,6 +40,10 @@ end.
 `hasBadIdentification` result. The invalidity reason is
 `reversed_edge_identification`.
 
+The exact source-order walk is independently reconstructed by
+`Regina.ExactEdgeLinks3`; its bad-identification result is checked against the
+generic face-link result used here.
+
 ### Vertex links
 
 For every global vertex, Regina computes
@@ -72,6 +76,7 @@ true only when every ideal vertex link has Euler characteristic `0`.
 - the conjunction used as the three-dimensional validity value;
 - triangulation orientability;
 - ideal and standard flags;
+- exact edge-link ordering completeness;
 - tetrahedron face-table and mapping completeness;
 - explicit vertex-link analysis completeness;
 - real-boundary orientation-assignment completeness;
@@ -79,6 +84,25 @@ true only when every ideal vertex link has Euler characteristic `0`.
 
 The completeness fields are not included in mathematical validity. They report
 whether richer translated structures were reconstructed in full.
+
+### Exact edge-link ordering completeness
+
+`report_exact_edge_link_order_complete` requires all of the following:
+
+1. every directed edge walk terminates as a path or cycle;
+2. the ordered classes contain exactly six local edge occurrences per
+   tetrahedron;
+3. consecutive embeddings, path boundaries, and cycle closures agree with the
+   actual facet crossings;
+4. every complete edge mapping has the sign chosen for its tetrahedron;
+5. every exact class agrees with the generic face quotient in membership,
+   degree, and bad-identification status.
+
+This field checks the special deque order used by Regina's codimension-two
+skeleton algorithm. It is deliberately separate from `report_validity_value`:
+the latter is the mathematical predicate, whereas the former says the Agda
+translation recovered the exact source ordering and all associated incidence
+data.
 
 ### Tetrahedron face-table completeness
 
@@ -90,9 +114,7 @@ whether richer translated structures were reconstructed in full.
 4. every paired-facet triangle mapping commutes with its gluing permutation.
 
 This field connects Regina's simplex-local `face()` and `faceMapping()` tables
-to the independently translated global skeleton. It remains separate from
-`report_validity_value`: an incomplete translation report must not silently
-change the mathematical predicate being translated.
+to the independently translated global skeleton.
 
 ### Explicit link and boundary completeness
 
@@ -117,15 +139,16 @@ conflict-free. Closed and ideal-only examples have no real-boundary assignment.
 
 ## Checked reports
 
-| Triangulation | Valid | Orientable | Ideal | Standard | Tetrahedron tables | Explicit links | Boundary signs |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| one tetrahedron | yes | yes | no | yes | complete | complete | complete |
-| two identity-glued tetrahedra | yes | yes | no | yes | complete | complete | complete |
-| 3D ball bundle | yes | yes | no | yes | complete | complete | complete |
-| figure-eight complement | yes | yes | yes | yes | complete | complete | complete |
+| Triangulation | Valid | Orientable | Ideal | Standard | Exact edge order | Tetrahedron tables | Explicit links | Boundary signs |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| one tetrahedron | yes | yes | no | yes | complete | complete | complete | complete |
+| two identity-glued tetrahedra | yes | yes | no | yes | complete | complete | complete | complete |
+| 3D ball bundle | yes | yes | no | yes | complete | complete | complete | complete |
+| figure-eight complement | yes | yes | yes | yes | complete | complete | complete | complete |
 
 The reversed-edge fixture fails validity and contains the explicit reason
-`reversed_edge_identification`.
+`reversed_edge_identification`; its exact ordered edge walk also records the
+same bad identification.
 
 ## Claim boundary
 
