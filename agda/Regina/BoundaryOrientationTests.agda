@@ -12,7 +12,7 @@ open import Regina.Triangulation
 open import Regina.Examples
 open import Regina.Link3
 open import Regina.Boundary3
-open import Regina.BoundarySurfaceChecked3
+open import Regina.BoundaryClassification3
 
 private
   record SurfaceObservation : Set where
@@ -21,7 +21,7 @@ private
       observed_boundary_kind : BoundaryComponentKind
       observed_euler_characteristic : SignedInteger
       observed_orientation_computed : Bool
-      observed_orientable : Bool
+      observed_orientation_value : Bool
       observed_surface_type : ClosedSurfaceType
 
   observeSurface : ClassifiedBoundarySurface → SurfaceObservation
@@ -29,17 +29,16 @@ private
     (classified_boundary_kind currentSurface)
     (classified_euler_characteristic currentSurface)
     (classified_orientation_computed currentSurface)
-    (classified_is_orientable currentSurface)
+    (classified_orientation_value currentSurface)
     (classified_surface_type currentSurface)
 
-  observeSurfaces : {simplex_count : Nat} →
-    Triangulation 3 simplex_count → List SurfaceObservation
+  observeSurfaces : {numberOfSimplices : Nat} →
+    Triangulation 3 numberOfSimplices → List SurfaceObservation
   observeSurfaces currentTriangulation =
     map observeSurface (classifiedBoundarySurfaces currentTriangulation)
 
 sphere_classification_from_euler_two :
-  classifyClosedSurface true true (signed_positive 1) ≡
-    orientable_genus 0
+  classifyClosedSurface true true (signed_positive 1) ≡ orientable_genus 0
 sphere_classification_from_euler_two = refl
 
 torus_classification_from_euler_zero :

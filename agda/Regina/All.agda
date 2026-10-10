@@ -21,7 +21,7 @@ import Regina.FaceLinks
 import Regina.Link3
 import Regina.VertexLinkSurface3
 import Regina.Boundary3
-import Regina.BoundarySurfaceChecked3
+import Regina.BoundaryClassification3
 import Regina.PermutationTests
 import Regina.TriangulationTests
 import Regina.ComponentTests
