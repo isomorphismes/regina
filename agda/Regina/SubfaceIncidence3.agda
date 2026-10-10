@@ -175,14 +175,14 @@ referenceAfterOccurrence lowerFaceDimension containingVertices
     (Embeddings.ordered_simplex_vertices
       (occurrence_embedding indexedOccurrence))
 
-subfaceReferenceFromVertices : Nat →
-  List (FaceLinkClass 3 simplex_count) →
-  Embeddings.FaceEmbedding 3 simplex_count → List (Fin 4) →
+subfaceReferenceFromVertices : {numberOfSimplices : Nat} → Nat →
+  List (FaceLinkClass 3 numberOfSimplices) →
+  Embeddings.FaceEmbedding 3 numberOfSimplices → List (Fin 4) →
   Maybe SubfaceReference3
-subfaceReferenceFromVertices lowerFaceDimension lowerFaceClasses
-  containingEmbedding selectedLocalVertices = referenceAfterOccurrence
-  lowerFaceDimension containingVertices
-  (findOccurrence targetFace lowerFaceClasses)
+subfaceReferenceFromVertices {numberOfSimplices} lowerFaceDimension
+  lowerFaceClasses containingEmbedding selectedLocalVertices =
+  referenceAfterOccurrence lowerFaceDimension containingVertices
+    (findOccurrence targetFace lowerFaceClasses)
   where
   containingVertices : List (Fin 4)
   containingVertices = takeElements
@@ -190,7 +190,7 @@ subfaceReferenceFromVertices lowerFaceDimension lowerFaceClasses
       (Embeddings.embedded_local_face containingEmbedding)))
     (Embeddings.ordered_simplex_vertices containingEmbedding)
 
-  targetFace : LocalFace 3 simplex_count
+  targetFace : LocalFace 3 numberOfSimplices
   targetFace = localFaceFromVertices
     (face_simplex (Embeddings.embedded_local_face containingEmbedding))
     selectedLocalVertices
