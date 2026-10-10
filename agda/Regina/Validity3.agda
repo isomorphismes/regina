@@ -15,6 +15,7 @@ open import Regina.Triangulation
 open import Regina.FaceLinks
 import Regina.Components as Components
 import Regina.Link3 as Link3
+import Regina.TetrahedronFaces3 as TetrahedronFaces
 import Regina.VertexLinkSurface3 as VertexLinks
 import Regina.BoundaryLabels3 as BoundaryLabels
 
@@ -75,6 +76,18 @@ threeDimensionalValidityValue currentTriangulation =
   edgeIdentificationsValid currentTriangulation and
   realBoundaryVertexLinksValid currentTriangulation
 
+tetrahedronFaceAnalysisComplete : {simplex_count : Nat} →
+  Triangulation 3 simplex_count → Bool
+tetrahedronFaceAnalysisComplete currentTriangulation =
+  TetrahedronFaces.allTetrahedronFaceReferencesResolved
+    currentTriangulation and
+  TetrahedronFaces.allTetrahedronMappingsValid
+    currentTriangulation and
+  TetrahedronFaces.tetrahedronIncidencesMatchFaceDegrees
+    currentTriangulation and
+  TetrahedronFaces.allFacetMappingsCompatible
+    currentTriangulation
+
 explicitVertexLinkComplete : {simplex_count : Nat} →
   VertexLinks.ExplicitVertexLink simplex_count → Bool
 explicitVertexLinkComplete currentLink =
@@ -104,6 +117,7 @@ record ThreeDimensionalValidityReport : Set where
     report_triangulation_orientable : Bool
     report_triangulation_ideal : Bool
     report_triangulation_standard : Bool
+    report_tetrahedron_face_mappings_complete : Bool
     report_explicit_vertex_links_complete : Bool
     report_real_boundary_orientations_complete : Bool
     report_invalidity_reasons : List InvalidityReason3
@@ -120,6 +134,7 @@ threeDimensionalValidityReport currentTriangulation =
     (Components.triangulationOrientable currentTriangulation)
     (Link3.threeDimensionalIsIdeal currentTriangulation)
     (Link3.threeDimensionalIsStandard currentTriangulation)
+    (tetrahedronFaceAnalysisComplete currentTriangulation)
     (explicitVertexLinkAnalysisComplete currentTriangulation)
     (realBoundaryOrientationAnalysisComplete currentTriangulation)
     (threeDimensionalInvalidityReasons currentTriangulation)
