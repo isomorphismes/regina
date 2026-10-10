@@ -256,13 +256,15 @@ partitionBoundaryFacets (suc fuel) edgeClasses facetUniverse
 
 realBoundaryFacetComponents : Triangulation 3 simplex_count →
   List (List (IndexedBoundaryFacet simplex_count))
-realBoundaryFacetComponents currentTriangulation = partitionBoundaryFacets
-  (length facetUniverse) edgeClasses facetUniverse facetUniverse
+realBoundaryFacetComponents
+  {simplex_count = numberOfSimplices} currentTriangulation =
+  partitionBoundaryFacets (length facetUniverse) edgeClasses
+    facetUniverse facetUniverse
   where
-  edgeClasses : List (FaceLinkClass 3 simplex_count)
+  edgeClasses : List (FaceLinkClass 3 numberOfSimplices)
   edgeClasses = faceLinkClasses currentTriangulation 1
 
-  facetUniverse : List (IndexedBoundaryFacet simplex_count)
+  facetUniverse : List (IndexedBoundaryFacet numberOfSimplices)
   facetUniverse = boundaryFacetClasses currentTriangulation
 
 data BoundaryComponentKind : Set where
@@ -270,7 +272,7 @@ data BoundaryComponentKind : Set where
   ideal_boundary_component : BoundaryComponentKind
 
 record BoundaryComponent3 : Set where
-  constructor boundary_component_3
+  constructor boundary_component_three
   field
     boundary_component_kind : BoundaryComponentKind
     source_face_class_numbers : List Nat
@@ -300,7 +302,7 @@ makeRealBoundaryComponent : List (FaceLinkClass 3 simplex_count) →
   List (FaceLinkClass 3 simplex_count) →
   List (IndexedBoundaryFacet simplex_count) → BoundaryComponent3
 makeRealBoundaryComponent vertexClasses edgeClasses currentComponent =
-  boundary_component_3
+  boundary_component_three
     real_boundary_component
     (componentFacetNumbers currentComponent)
     (length vertexNumbers)
@@ -320,20 +322,21 @@ makeRealBoundaryComponent vertexClasses edgeClasses currentComponent =
 
 realBoundaryComponents : Triangulation 3 simplex_count →
   List BoundaryComponent3
-realBoundaryComponents currentTriangulation = map
+realBoundaryComponents
+  {simplex_count = numberOfSimplices} currentTriangulation = map
   (makeRealBoundaryComponent vertexClasses edgeClasses)
   (realBoundaryFacetComponents currentTriangulation)
   where
-  vertexClasses : List (FaceLinkClass 3 simplex_count)
+  vertexClasses : List (FaceLinkClass 3 numberOfSimplices)
   vertexClasses = faceLinkClasses currentTriangulation 0
 
-  edgeClasses : List (FaceLinkClass 3 simplex_count)
+  edgeClasses : List (FaceLinkClass 3 numberOfSimplices)
   edgeClasses = faceLinkClasses currentTriangulation 1
 
 makeIdealBoundaryComponent : Link3.VertexLinkSummary →
   VertexLinks.ExplicitVertexLink simplex_count → BoundaryComponent3
 makeIdealBoundaryComponent currentSummary currentExplicitLink =
-  boundary_component_3
+  boundary_component_three
     ideal_boundary_component
     (Link3.vertex_class_number currentSummary ∷ [])
     (VertexLinks.explicitLinkVertexCount currentExplicitLink)
