@@ -124,7 +124,7 @@ ball_vertices_have_real_boundary_disc_links :
       (signed_positive 0) ∷ [])
 ball_vertices_have_real_boundary_disc_links = refl
 
-sphere_vertices_are_internal_with_sphere_links :
+sphere_vertices_are_internal_and_have_sphere_links :
   map_outcome observeVertices (sphere 3) ≡
     accepted
       (vertex_observation 0 0 false true true false true true
@@ -135,7 +135,7 @@ sphere_vertices_are_internal_with_sphere_links :
         (signed_positive 1) ∷
        vertex_observation 0 0 false true true false true true
         (signed_positive 1) ∷ [])
-sphere_vertices_are_internal_with_sphere_links = refl
+sphere_vertices_are_internal_and_have_sphere_links = refl
 
 ball_bundle_vertex_has_real_boundary_flag :
   map_outcome observeVertices three_dimensional_ball_bundle ≡
