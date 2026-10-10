@@ -19,15 +19,18 @@ Source baseline:
 | [`Regina.Components`](Regina/Components.agda) | Connected components, simplex counts, boundary-facet counts, permutation parity, and orientability. |
 | [`Regina.DualForest`](Regina/DualForest.agda) | Regina's deterministic breadth-first maximal forest in the dual 1-skeleton. |
 | [`Regina.Skeleton`](Regina/Skeleton.agda) | Quotient classes of local vertices, edges, and all other proper faces. |
-| [`Regina.Embeddings`](Regina/Embeddings.agda) | Ordered local-face appearances, propagation through gluings, and non-trivial self-identification detection. |
-| [`Regina.All`](Regina/All.agda) | Aggregate entry point for implementation and reduction tests. |
+| [`Regina.Embeddings`](Regina/Embeddings.agda) | Ordered local-face appearances and basic non-trivial self-identification detection. |
+| [`Regina.FaceLinks`](Regina/FaceLinks.agda) | Orientation-normalised face returns, codimension-specific bad-identification tests, and link orientability. |
+| [`Regina.Link3`](Regina/Link3.agda) | Three-dimensional vertex-link Euler characteristics and finite, real-boundary, or ideal classification. |
+| [`Regina.All`](Regina/All.agda) | Aggregate entry point for all implementation and reduction-test modules. |
 
 Source maps:
 
 - [`SOURCE-MAP.tsv`](SOURCE-MAP.tsv): permutations, gluings, transitions, input, and examples;
 - [`COMPONENTS-SOURCE-MAP.tsv`](COMPONENTS-SOURCE-MAP.tsv): components and orientability;
 - [`SKELETON-SOURCE-MAP.tsv`](SKELETON-SOURCE-MAP.tsv): lower-dimensional face quotient;
-- [`FOREST-EMBEDDINGS-SOURCE-MAP.tsv`](FOREST-EMBEDDINGS-SOURCE-MAP.tsv): dual forest and ordered embeddings.
+- [`FOREST-EMBEDDINGS-SOURCE-MAP.tsv`](FOREST-EMBEDDINGS-SOURCE-MAP.tsv): dual forest and ordered embeddings;
+- [`FACE-LINKS-SOURCE-MAP.tsv`](FACE-LINKS-SOURCE-MAP.tsv): orientation-normalised face links and three-dimensional vertex links.
 
 ## Certified facet gluings
 
@@ -50,81 +53,90 @@ itself.
 
 Top-dimensional simplices form a finite adjacency graph through paired facets.
 Finite closure partitions them into connected components in increasing root
-index. The translation reports component sizes and counts unpaired facets
-incident to each component.
+index. An even facet permutation reverses the neighboring simplex orientation;
+an odd permutation preserves it. Orientability is checked in the doubled graph
+`(simplex, positive | negative)`.
 
-Regina's orientation rule is preserved: an even facet permutation reverses the
-neighboring simplex orientation, while an odd permutation preserves it.
-Orientability is checked as reachability in the doubled graph
-`(simplex, positive | negative)`; a component is nonorientable when one simplex
-is reachable with both signs.
+The dual forest follows Regina's order exactly: increasing roots,
+breadth-first discovery, increasing facet number, and the first gluing that
+reaches each undiscovered simplex. Both incident facets are recorded. Loops and
+later parallel edges do not enter the forest.
 
-The dual forest follows Regina's concrete traversal order:
-
-1. roots are considered by increasing simplex index;
-2. each component is searched breadth-first;
-3. facets are examined from 0 through `dimension`;
-4. the first gluing that discovers a simplex becomes its forest edge;
-5. both incident facets are recorded.
-
-Self-pairings and later gluings to an already discovered simplex are not forest
-edges. The tests recover Regina's first-discovery choices for the sphere,
-figure-eight, and four-dimensional ball-bundle examples.
-
-## Face quotient and ordered appearances
+## Face quotient, embeddings, and links
 
 A local `k`-face is a simplex index plus a Boolean characteristic vector
-selecting exactly `k+1` local vertices. It crosses a glued facet when it does not
-contain that facet's opposite vertex. The gluing permutation transports the
-complete selected vertex set into the neighboring simplex. Finite saturation
-therefore computes the global face classes and their degrees.
+selecting exactly `k+1` local vertices. Traversing facet gluings and taking
+finite closure produces the global face classes and their degrees.
 
-An ordered `FaceEmbedding` adds a complete local vertex list. The canonical
-Agda list places selected face vertices first in increasing order and the
-complement afterward in decreasing order, following Regina's generic ordering
-rule. Crossing a facet applies the full gluing permutation to this list.
+An ordered embedding stores every local vertex, with the selected face vertices
+first. `Regina.FaceLinks` then applies Regina's orientation convention: before
+a codimension-at-least-two crossing, it swaps the final two ordering positions
+and applies the complete facet gluing permutation.
 
-When traversal returns to a local face already seen, the first `k+1` entries are
-compared. A disagreement means the underlying `k`-face has been identified with
-itself by a non-identity permutation—for example, an edge glued to itself with
-its endpoints reversed.
+Return maps are checked differently by codimension:
 
-This selected-face-prefix check translates Regina's bad-identification
-condition. It does **not** claim byte-for-byte equality with Regina's stored
-embedding permutations: Regina has standard-dimension lookup tables, legacy
-vertex conventions, orientation normalization on complementary vertices, and
-special appearance ordering in codimension two. Those remain outside this
-slice.
+- codimension one requires no further return test;
+- codimension two compares the complete ordering in dimensions above two;
+- larger codimension compares the face-vertex prefix for bad
+  self-identifications and the complementary permutation parity for link
+  orientability.
 
-Checked three-dimensional signatures:
+This keeps two failures separate. An edge can return with its endpoints reversed
+while its one-dimensional link remains orientable. A vertex can return with its
+own label fixed while the complementary triangle is reversed, producing a
+nonorientable vertex link without a bad vertex identification.
 
-| Construction | vertices | edges | facets |
-|---|---:|---:|---:|
-| one tetrahedron, `ball 3` | 4 | 6 | 4 |
-| two identity-glued tetrahedra, `sphere 3` | 4 | 6 | 4 |
-| Regina's 3D ball bundle | 1 | 3 | 3 |
-| Regina's figure-eight knot complement | 1 | 2 | 4 |
+See [`FACE-LINKS.md`](FACE-LINKS.md) for the exact rules and fixtures.
 
-For the figure-eight triangulation, the single vertex class has degree 8, both
-edge classes have degree 6, and all four facet classes have degree 2. Its tested
-vertex, edge, and facet classes have no detected non-trivial
-self-identifications.
+## Three-dimensional vertex links
 
-A deliberately malformed one-tetrahedron example pairs two facets with
-`[1,0,3,2]`. The local edge `{2,3}` returns as `{3,2}`, and the Agda traversal
-marks that edge class as having a bad identification.
+For dimension three, Regina computes a vertex-link Euler characteristic from
+global edge incidence:
+
+```text
+chi(link) = (2 * interior_link_vertices + boundary_link_vertices
+             - tetrahedron_vertex_degree) / 2
+```
+
+A boundary edge contributes `1` to each valid endpoint link; an interior edge
+contributes `2`. An invalid reversed edge contributes only at its first endpoint,
+matching the source's protection against false double-counting.
+
+The translated classifications are:
+
+- boundary vertex with Euler characteristic `1`: real-boundary disc link;
+- other boundary Euler characteristic: invalid boundary link;
+- non-boundary Euler characteristic `2`: finite 2-sphere link;
+- other non-boundary Euler characteristic: ideal vertex;
+- ideal Euler characteristic `0`: standard ideal link.
+
+Checked examples:
+
+| Construction | Vertex-link result | Aggregate report |
+|---|---|---|
+| One tetrahedron, `ball 3` | Four orientable discs, degree 1, Euler characteristic 1 | locally valid, non-ideal, standard |
+| Two identity-glued tetrahedra, `sphere 3` | Four orientable 2-spheres, degree 2, Euler characteristic 2 | locally valid, non-ideal, standard |
+| Regina's 3D ball bundle | One orientable disc, degree 4, Euler characteristic 1 | locally valid, non-ideal, standard |
+| Figure-eight knot complement | One orientable closed link, degree 8, Euler characteristic 0 | locally valid, ideal, standard |
+| Reversed-edge fixture | Bad codimension-two return | locally invalid |
+| Complement-reversal fixture | Nonorientable vertex link with no bad vertex identification | the two diagnostics remain distinct |
+
+`threeDimensionalLocallyValid` is intentionally not called `isValid()`. It
+combines certified reciprocal facet data, the translated lower-face
+self-identification rules, and the real-boundary Euler test. It does not claim
+the full Regina validity contract.
 
 ## Exact boundary
 
-The current work does not yet implement:
+The current work still omits:
 
 - Regina's standard-dimension face-number lookup tables and legacy embedding labels;
-- exact codimension-two path/cycle ordering of appearances;
-- orientation-normalized ordering of complementary embedding vertices;
-- face links, link orientability, or link triangulations;
-- bad-link detection or the full `isValid()` contract;
-- real and ideal boundary components;
-- normal surfaces and hypersurfaces, homology, fundamental groups, Pachner moves, recognition, isomorphism signatures, geometry, GUI code, or native bindings.
+- exact codimension-two path/cycle appearance order;
+- explicit link triangulations and their face tables;
+- higher-dimensional link-manifold recognition and bad-link flags;
+- real and ideal boundary-component adjacency structures;
+- Regina's complete `isValid()` implementation;
+- normal surfaces and hypersurfaces, homology, fundamental groups, Pachner moves, recognition, isomorphism signatures, geometry, GUI code, and native bindings.
 
 The simplex count is fixed in the Agda type. State changes are immutable.
 Packed integers, pointers, mutation notifications, caches, and Regina's
@@ -140,14 +152,17 @@ agda --safe --without-K --ignore-interfaces \
   -i agda agda/Regina/All.agda
 ```
 
-The aggregate checks 16 local modules and 109 concrete reduction assertions:
+The aggregate checks **20 local modules and 136 concrete reduction
+assertions**:
 
 - `Regina.PermutationTests`: 16;
 - `Regina.TriangulationTests`: 48;
 - `Regina.ComponentTests`: 9;
 - `Regina.DualForestTests`: 10;
 - `Regina.SkeletonTests`: 15;
-- `Regina.EmbeddingTests`: 11.
+- `Regina.EmbeddingTests`: 11;
+- `Regina.FaceLinkTests`: 15;
+- `Regina.Link3Tests`: 12.
 
 See [`VERIFICATION.txt`](VERIFICATION.txt) and the branch workflow for the
 recorded run.
@@ -156,10 +171,11 @@ recorded run.
 
 Thank you to **Benjamin A. Burton**—credited as **Ben Burton** in the translated
 source headers—for Regina and the translated permutation, triangulation,
-component, orientation, skeleton, dual-forest, and face-embedding algorithms.
-Thank you to **Ryan Budney** and **William Pettersson** for their work on Regina.
-Thank you to **Richard Rannard** for the figure-eight construction credited by
-Regina to chapter 8 of his PhD thesis.
+component, orientation, skeleton, dual-forest, face-embedding, link-orientation,
+and three-dimensional vertex-link algorithms. Thank you to **Ryan Budney** and
+**William Pettersson** for their work on Regina. Thank you to **Richard Rannard**
+for the figure-eight construction credited by Regina to chapter 8 of his PhD
+thesis.
 
 These acknowledgments do not replace Regina's complete contributor and citation
 records. The translated material follows the repository's existing
