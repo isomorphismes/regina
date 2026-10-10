@@ -19,7 +19,7 @@ import Regina.DualForest
 import Regina.Skeleton
 import Regina.Embeddings
 import Regina.FaceLinks
-import Regina.EdgeLinks3
+import Regina.ExactEdgeLinks3
 import Regina.SubfaceIncidence3
 import Regina.TetrahedronFaces3
 import Regina.Link3
@@ -36,7 +36,7 @@ import Regina.DualForestTests
 import Regina.SkeletonTests
 import Regina.EmbeddingTests
 import Regina.FaceLinkTests
-import Regina.EdgeLinkOrderTests
+import Regina.ExactEdgeLinkTests
 import Regina.SubfaceTests
 import Regina.TetrahedronFaceTests
 import Regina.Link3Tests
