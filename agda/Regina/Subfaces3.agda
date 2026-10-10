@@ -15,7 +15,7 @@ open import Regina.Foundation
 open import Regina.Permutation
 open import Regina.Triangulation
 open import Regina.Skeleton
-open import Regina.FaceLinks
+open import Regina.FaceLinks hiding (positionOfVertex)
 import Regina.Embeddings as Embeddings
 import Regina.Link3 as Link3
 
