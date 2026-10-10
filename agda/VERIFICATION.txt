@@ -1,31 +1,36 @@
 REGINA AGDA TRANSLATION — AGGREGATE VERIFICATION
 
-Checked at: 2026-10-09 23:54:46 UTC
+Checked at: 2026-10-10 00:18:56 UTC
 Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
-Verified code commit: 6da52df8ee4e322f4d47b0de327f58e22f3812b5
+Verified implementation commit: 4bb1ea4554dc62f459c1fa2ef36cda53447d541e
 Branch: Agda
-Workflow run: https://github.com/isomorphisms/regina/actions/runs/38006646143
+Workflow run: https://github.com/isomorphisms/regina/actions/runs/38008450328
 Target: GitHub-hosted Ubuntu 24.04 amd64
 Compiler: Agda 2.6.3
 
 Aggregate check: PASS
 Exit code: 0
-Local Agda modules checked: 12
-Concrete reduction assertions: 88
+Local Agda modules checked: 16
+Concrete reduction assertions: 109
   Regina.PermutationTests: 16
   Regina.TriangulationTests: 48
   Regina.ComponentTests: 9
+  Regina.DualForestTests: 10
   Regina.SkeletonTests: 15
+  Regina.EmbeddingTests: 11
 
 Command:
 agda --safe --without-K --ignore-interfaces --no-libraries --no-default-libraries -i agda agda/Regina/All.agda
 
-The run checked all implementation modules and test equalities with fresh
+The run checked every implementation module and every test equality with fresh
 interfaces. No Agda standard library or user-installed Agda library was loaded.
 Computation was exercised by Agda reduction.
 
-This receipt establishes type-checking and the stated finite computations. It
-does not claim a compiled GHC executable, C++ differential testing, complete
-Regina API coverage, manifold recognition, link construction, real boundary
-components, dual-forest construction, normal-surface algorithms, or equivalence
-of performance characteristics.
+The newly checked slice includes Regina's deterministic dual spanning forest,
+explicit ordered local-face appearances, and selected-face-prefix detection of
+non-trivial self-identifications. The receipt does not claim exact equality of
+Regina's standard-dimension embedding labels, orientation-normalized complement
+order, codimension-two appearance order, link construction, link orientability,
+bad-link detection, real boundary components, full manifold validity, compiled
+GHC execution, C++ differential testing, complete Regina API coverage, or
+Regina's performance characteristics.
