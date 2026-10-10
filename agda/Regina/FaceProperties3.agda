@@ -76,7 +76,7 @@ vertexFlagsCode idealValue realBoundaryValue =
   boolWeight realBoundaryValue real_boundary_vertex_flag
 
 record FaceCoreProperties3 : Set where
-  constructor face_core_properties_3
+  constructor face_core_properties_three
   field
     core_face_dimension : Nat
     core_face_class_number : Nat
@@ -107,7 +107,7 @@ coreHasBadLink currentProperties =
 makeCoreProperties : Nat → Nat → Nat → Bool → Bool → Bool →
   FaceInvalidityBits → FaceCoreProperties3
 makeCoreProperties faceDimension classNumber faceDegree linkOrientable
-  touchesRealBoundary boundaryValue invalidityBits = face_core_properties_3
+  touchesRealBoundary boundaryValue invalidityBits = face_core_properties_three
   faceDimension
   classNumber
   faceDegree
@@ -118,7 +118,7 @@ makeCoreProperties faceDimension classNumber faceDegree linkOrientable
   invalidityBits
 
 record VertexProperties3 : Set where
-  constructor vertex_properties_3
+  constructor vertex_properties_three
   field
     vertex_core : FaceCoreProperties3
     vertex_link_closed : Bool
@@ -130,7 +130,7 @@ open VertexProperties3 public
 
 makeVertexProperties : FaceLinkClass 3 simplex_count →
   Link3.VertexLinkSummary → VertexProperties3
-makeVertexProperties currentClass currentSummary = vertex_properties_3
+makeVertexProperties currentClass currentSummary = vertex_properties_three
   (makeCoreProperties 0
     (Link3.vertex_class_number currentSummary)
     (length (face_link_embeddings currentClass))
@@ -175,7 +175,7 @@ vertexProperties currentTriangulation = buildVertexProperties
   (Link3.threeDimensionalVertexLinkSummaries currentTriangulation)
 
 record EdgeProperties3 : Set where
-  constructor edge_properties_3
+  constructor edge_properties_three
   field
     edge_core : FaceCoreProperties3
     edge_link_closed : Bool
@@ -184,7 +184,7 @@ open EdgeProperties3 public
 makeEdgeProperties : Triangulation 3 simplex_count → Nat →
   FaceLinkClass 3 simplex_count → EdgeProperties3
 makeEdgeProperties currentTriangulation classNumber currentClass =
-  edge_properties_3
+  edge_properties_three
     (makeCoreProperties 1 classNumber
       (length (face_link_embeddings currentClass))
       (face_link_is_orientable currentClass)
@@ -236,7 +236,7 @@ triangleClassInDualForest currentTriangulation currentClass = any
   (face_link_embeddings currentClass)
 
 record TriangleProperties3 : Set where
-  constructor triangle_properties_3
+  constructor triangle_properties_three
   field
     triangle_core : FaceCoreProperties3
     triangle_in_maximal_forest : Bool
@@ -245,7 +245,7 @@ open TriangleProperties3 public
 makeTriangleProperties : Triangulation 3 simplex_count → Nat →
   FaceLinkClass 3 simplex_count → TriangleProperties3
 makeTriangleProperties currentTriangulation classNumber currentClass =
-  triangle_properties_3
+  triangle_properties_three
     (makeCoreProperties 2 classNumber
       (length (face_link_embeddings currentClass))
       (face_link_is_orientable currentClass)
