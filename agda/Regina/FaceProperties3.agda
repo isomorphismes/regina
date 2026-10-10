@@ -239,7 +239,7 @@ record TriangleProperties3 : Set where
   constructor triangle_properties_three
   field
     triangle_core : FaceCoreProperties3
-    triangle_in_maximal_forest : Bool
+    triangle_maximal_forest_member : Bool
 open TriangleProperties3 public
 
 makeTriangleProperties : Triangulation 3 simplex_count → Nat →
