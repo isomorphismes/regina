@@ -73,16 +73,12 @@ locateContainingVertexFrom currentPosition targetVertex
 ... | false = locateContainingVertexFrom (suc currentPosition)
   targetVertex remainingVertices
 
-locateContainingVertex : Fin 4 → List (Fin 4) → Maybe Nat
-locateContainingVertex targetVertex vertices =
-  locateContainingVertexFrom zero targetVertex vertices
-
 mapVerticesToPositions : List (Fin 4) → List (Fin 4) →
   Maybe (List Nat)
 mapVerticesToPositions [] containingVertices = just []
 mapVerticesToPositions (currentVertex ∷ remainingVertices)
   containingVertices
-  with locateContainingVertex currentVertex containingVertices |
+  with locateContainingVertexFrom zero currentVertex containingVertices |
        mapVerticesToPositions remainingVertices containingVertices
 ... | just currentPosition | just remainingPositions =
   just (currentPosition ∷ remainingPositions)
