@@ -1,27 +1,28 @@
 REGINA AGDA TRANSLATION — AGGREGATE VERIFICATION
 
-Checked at: 2026-10-10 11:25:20 UTC
+Checked at: 2026-10-10 11:50:27 UTC
 Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
-Verified implementation commit: 833b42b65de974850de1cc488d29496977aaae24
+Verified implementation commit: 49ed9dc71d10d68ef1f7b77ec63ec3e427af7de6
 Delivery repository: https://github.com/isomorphismes/regina
 Branch: Agda
-Workflow run: https://github.com/isomorphismes/regina/actions/runs/38048277555
+Workflow run: https://github.com/isomorphismes/regina/actions/runs/38049756128
 Target: GitHub-hosted Ubuntu 24.04 amd64
 Compiler: Agda 2.6.3
 
 Aggregate check: PASS
 Exit code: 0
-Local Agda modules checked: 36
-Concrete reduction assertions: 210
+Local Agda modules checked: 38
+Concrete reduction assertions: 228
   Regina.PermutationTests: 16
   Regina.TriangulationTests: 48
   Regina.ComponentTests: 9
   Regina.DualForestTests: 10
   Regina.SkeletonTests: 15
   Regina.EmbeddingTests: 11
+  Regina.FaceLinkTests: 15
+  Regina.ExactEdgeLinkTests: 18
   Regina.SubfaceTests: 15
   Regina.TetrahedronFaceTests: 13
-  Regina.FaceLinkTests: 15
   Regina.Link3Tests: 12
   Regina.VertexLinkTests: 8
   Regina.BoundaryTests: 7
@@ -37,25 +38,32 @@ The run checked every implementation module and every test equality with fresh
 interfaces. No Agda standard library or user-installed Agda library was loaded.
 Computation was exercised by Agda reduction.
 
-The newly checked slice translates the dimension-three top-simplex face tables:
-tetrahedron-to-vertex, tetrahedron-to-edge, and tetrahedron-to-triangle lookup,
-together with the corresponding `Simplex::faceMapping()` permutations. Every
-successful lookup returns a global face-class number and the checked `Perm<4>`
-from its translated ordered face occurrence.
+The newly checked slice translates Regina's exact dimension-three
+codimension-two skeleton order. It uses the six source edge-ordering tables,
+adjusts each seed mapping to the tetrahedron orientation, and walks the
+one-dimensional edge link in both directions. Forward appearances are appended,
+backward appearances are prepended, boundary paths retain their directed end
+facets, and closed links retain their cycle order.
 
-The reductions verify Regina's local vertex, edge, and triangle numbering,
-exact complete triangle mappings for a single tetrahedron, active mapping
-images for all six edge numbers, and fail-closed invalid indices. They also
-cross-check the implementation against independent layers: local occurrence
-counts reproduce all global face degrees, and every paired-facet triangle
-mapping commutes with its tetrahedron gluing permutation.
+Every crossing computes adjacentGluing * currentMapping * swap(2,3). A return
+to an assigned local edge compares the complete mapping and records a bad
+identification when the edge has been mapped to itself nontrivially.
 
-The validity report now exposes this as a separate reconstruction-completeness
-field. The mathematical dimension-three validity value is unchanged.
+The reductions recover six degree-one paths for the ball, six degree-two cycles
+for the sphere, ball-bundle path degrees 3,2,1, and two degree-six cycles for
+the figure-eight triangulation. The reversed-edge fixture remains detected.
+They also check exhaustive six-local-edges-per-tetrahedron coverage, every path
+endpoint and cycle closure, mapping signs against deterministic simplex
+orientations, and agreement with the generic edge quotient in membership,
+degree and invalidity status.
 
-This receipt does not claim the generic all-dimensional Simplex::face() family,
-higher-dimensional face-numbering tables, mutable C++ simplex face arrays,
-Regina's cache or notification behavior, exact codimension-two appearance
-order, triangle combinatorial-type recognition, higher-dimensional face
-specialisations, compiled GHC execution, C++ differential testing, complete
-Regina API coverage, or Regina's performance characteristics.
+The validity report now exposes exact edge-link ordering as a separate
+reconstruction-completeness field. The mathematical dimension-three validity
+value is unchanged.
+
+This receipt does not claim exact codimension-two order outside dimension three,
+the generic all-dimensional simplex and Face APIs, higher-dimensional
+face-numbering tables or link-manifold recognition, mutable C++ face deques and
+pointer identity, cache or notification behavior, triangle combinatorial-type
+recognition, compiled GHC execution, C++ differential testing, complete Regina
+API coverage, or Regina's performance characteristics.
