@@ -1,24 +1,25 @@
 REGINA AGDA TRANSLATION — AGGREGATE VERIFICATION
 
-Checked at: 2026-10-10 03:48:37 UTC
+Checked at: 2026-10-10 04:22:57 UTC
 Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
-Verified implementation commit: 78edddb3373b47487577118678ea0821053e43b5
+Verified implementation commit: 5b269d95a283bd7ef538ee9757dc76b32812113a
 Delivery repository: https://github.com/isomorphismes/regina
 Branch: Agda
-Workflow run: https://github.com/isomorphismes/regina/actions/runs/38021819581
+Workflow run: https://github.com/isomorphismes/regina/actions/runs/38023806695
 Target: GitHub-hosted Ubuntu 24.04 amd64
 Compiler: Agda 2.6.3
 
 Aggregate check: PASS
 Exit code: 0
-Local Agda modules checked: 32
-Concrete reduction assertions: 182
+Local Agda modules checked: 34
+Concrete reduction assertions: 197
   Regina.PermutationTests: 16
   Regina.TriangulationTests: 48
   Regina.ComponentTests: 9
   Regina.DualForestTests: 10
   Regina.SkeletonTests: 15
   Regina.EmbeddingTests: 11
+  Regina.SubfaceTests: 15
   Regina.FaceLinkTests: 15
   Regina.Link3Tests: 12
   Regina.VertexLinkTests: 8
@@ -35,20 +36,24 @@ The run checked every implementation module and every test equality with fresh
 interfaces. No Agda standard library or user-installed Agda library was loaded.
 Computation was exercised by Agda reduction.
 
-The newly checked slice translates dimension-three Face API observations. It
-reproduces the exact invalidity codes 0, 1 and 2 and their combined code 3;
-reports face degree, link orientation, boundary and internal status; records
-closed, ideal and standard vertex links and their Euler characteristics; and
-connects global triangles to the previously translated maximal dual forest.
+The newly checked slice translates the useful dimension-three part of
+Face::face() and Face::faceMapping(): edge endpoints, triangle vertices, and
+triangle edges. Every successful lookup returns the global lower-face class and
+a certified Perm<4>. Its first lowerdim+1 images map the lower face's inherent
+vertex labels into the containing face's inherent labels. The remaining images
+are completed deterministically and are not claimed to match Regina, which
+documents them as semantically unspecified.
 
-The tests distinguish real-boundary disc vertices, internal sphere-link
-vertices, the closed ideal figure-eight vertex, degree-one boundary edges,
-degree-two internal edges, a reversed edge carrying INVALID_IDENTIFICATION, and
-a malformed real-boundary vertex carrying INVALID_LINK.
+The reductions verify total lookup and inherent numbering for the ball, sphere,
+ball-bundle, and figure-eight examples. They recover tetrahedral incidence
+counts, preserve incidence multiplicity, identify both figure-eight edges as
+loops, and show that each loop's two endpoint references return the same global
+vertex class while retaining distinct active mapping images 0 and 1.
 
-This receipt does not claim C++ face pointer identity, mutable cache lifetime,
-component or boundary-component pointers, exact codimension-two appearance
-order, subface mapping APIs, triangle combinatorial-type recognition,
+This receipt does not claim the generic all-dimensional Face::face() family,
+tetrahedron-to-proper-face lookup through the Face API, Regina-identical unused
+mapping images, mutable C++ face pointers or cached subface arrays, exact
+codimension-two appearance order, triangle combinatorial-type recognition,
 higher-dimensional face specialisations, compiled GHC execution, C++
 differential testing, complete Regina API coverage, or Regina's performance
 characteristics.
