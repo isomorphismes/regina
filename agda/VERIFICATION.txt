@@ -1,17 +1,17 @@
 REGINA AGDA TRANSLATION — AGGREGATE VERIFICATION
 
-Checked at: 2026-10-10 02:36:31 UTC
+Checked at: 2026-10-10 02:50:14 UTC
 Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
-Verified implementation commit: d728295a6583c76b0e648d274984b161a595cc24
+Verified implementation commit: f72b4d5a4c8e74a5aa7dda6eb6705893001abd79
 Branch: Agda
-Workflow run: https://github.com/isomorphisms/regina/actions/runs/38017528205
+Workflow run: https://github.com/isomorphisms/regina/actions/runs/38018370552
 Target: GitHub-hosted Ubuntu 24.04 amd64
 Compiler: Agda 2.6.3
 
 Aggregate check: PASS
 Exit code: 0
-Local Agda modules checked: 26
-Concrete reduction assertions: 159
+Local Agda modules checked: 30
+Concrete reduction assertions: 169
   Regina.PermutationTests: 16
   Regina.TriangulationTests: 48
   Regina.ComponentTests: 9
@@ -23,6 +23,8 @@ Concrete reduction assertions: 159
   Regina.VertexLinkTests: 8
   Regina.BoundaryTests: 7
   Regina.BoundaryOrientationTests: 8
+  Regina.BoundaryLabelTests: 4
+  Regina.ValidityTests: 6
 
 Command:
 agda --safe --without-K --ignore-interfaces --no-libraries --no-default-libraries -i agda agda/Regina/All.agda
@@ -31,19 +33,19 @@ The run checked every implementation module and every test equality with fresh
 interfaces. No Agda standard library or user-installed Agda library was loaded.
 Computation was exercised by Agda reduction.
 
-The newly checked slice computes real-boundary orientation from the induced
-direction on every shared global boundary edge. It uses finite reachability in
-the doubled graph `(boundary facet, sign)` and reports orientation only after
-all side labels resolve and every boundary edge has exactly two side
-occurrences. A conflicting sign return detects nonorientability.
+The newly checked slice exports one canonical sign for every real-boundary
+facet relative to a positive component root. Conflict and unreachable states
+remain explicit, and an assignment is complete only when every facet has one
+unique sign after all incidence checks pass.
 
-Combining this result with Euler characteristic derives the ball boundary as an
-orientable genus-zero sphere and the three-dimensional ball-bundle boundary as
-an orientable genus-one torus. The existing ideal-link data likewise classifies
-the figure-eight cusp boundary as an orientable genus-one torus.
+It also replaces the earlier undifferentiated local-validity Boolean with a
+source-shaped three-dimensional report. The report separately checks reciprocal
+facet data, reversed-edge identifications, and invalid real-boundary vertex
+links, and returns named invalidity reasons. Ideal, standard, orientability and
+additional reconstruction-completeness observations remain separate fields.
 
-This receipt does not claim Regina-compatible packed boundary-facet gluing
-serialization, exported orientation labels for each boundary face,
-higher-dimensional boundary-manifold recognition, the complete isValid()
-contract, compiled GHC execution, C++ differential testing, complete Regina API
-coverage, or Regina's performance characteristics.
+This receipt does not claim the mutable C++ face-object cache or exact
+whyInvalid() bit storage, higher-dimensional link-manifold recognition, the
+generic all-dimensions isValid() implementation, compiled GHC execution, C++
+differential testing, complete Regina API coverage, or Regina's performance
+characteristics.

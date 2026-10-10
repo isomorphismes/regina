@@ -19,12 +19,14 @@ Source baseline:
 | [`Regina.Components`](Regina/Components.agda) | Connected components, simplex counts, boundary-facet counts, permutation parity, and orientability. |
 | [`Regina.DualForest`](Regina/DualForest.agda) | Regina's deterministic breadth-first maximal forest in the dual 1-skeleton. |
 | [`Regina.Skeleton`](Regina/Skeleton.agda) | Quotient classes of local vertices, edges, and all other proper faces. |
-| [`Regina.Embeddings`](Regina/Embeddings.agda) | Ordered local-face appearances and basic non-trivial self-identification detection. |
+| [`Regina.Embeddings`](Regina/Embeddings.agda) | Ordered local-face appearances and non-trivial self-identification detection. |
 | [`Regina.FaceLinks`](Regina/FaceLinks.agda) | Orientation-normalised face returns, codimension-specific bad-identification tests, and link orientability. |
 | [`Regina.Link3`](Regina/Link3.agda) | Three-dimensional vertex-link Euler characteristics and finite, real-boundary, or ideal classification. |
 | [`Regina.VertexLinkSurface3`](Regina/VertexLinkSurface3.agda) | Explicit triangle surfaces for three-dimensional vertex links, with addressed side pairings and endpoint-labelled corners. |
 | [`Regina.Boundary3`](Regina/Boundary3.agda) | Real boundary components from unpaired facets and ideal boundary components from explicit vertex links. |
-| [`Regina.BoundaryClassification3`](Regina/BoundaryClassification3.agda) | Real-boundary orientation propagation and closed-surface classification by orientability and Euler characteristic. |
+| [`Regina.BoundaryClassification3`](Regina/BoundaryClassification3.agda) | Real-boundary orientation propagation and closed-surface classification. |
+| [`Regina.BoundaryLabels3`](Regina/BoundaryLabels3.agda) | Canonical positive or negative orientation labels for every real-boundary facet, plus explicit conflict and unresolved states. |
+| [`Regina.Validity3`](Regina/Validity3.agda) | A reasoned source-shaped three-dimensional validity report and separate translation-completeness diagnostics. |
 | [`Regina.All`](Regina/All.agda) | Aggregate entry point for all implementation and reduction-test modules. |
 
 Source maps:
@@ -35,7 +37,8 @@ Source maps:
 - [`FOREST-EMBEDDINGS-SOURCE-MAP.tsv`](FOREST-EMBEDDINGS-SOURCE-MAP.tsv): dual forest and ordered embeddings;
 - [`FACE-LINKS-SOURCE-MAP.tsv`](FACE-LINKS-SOURCE-MAP.tsv): orientation-normalised face links and three-dimensional Euler data;
 - [`VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv`](VERTEX-LINKS-BOUNDARY-SOURCE-MAP.tsv): explicit vertex-link surfaces and boundary components;
-- [`BOUNDARY-ORIENTATION-SOURCE-MAP.tsv`](BOUNDARY-ORIENTATION-SOURCE-MAP.tsv): real-boundary orientation and surface classification.
+- [`BOUNDARY-ORIENTATION-SOURCE-MAP.tsv`](BOUNDARY-ORIENTATION-SOURCE-MAP.tsv): real-boundary orientation and surface classification;
+- [`VALIDITY3-SOURCE-MAP.tsv`](VALIDITY3-SOURCE-MAP.tsv): exported boundary-facet labels and the three-dimensional validity report.
 
 ## Certified gluing core
 
@@ -104,35 +107,38 @@ explicit finite triangle surfaces.
 
 ## Real and ideal boundary components
 
-`Regina.Boundary3` keeps Regina's two boundary mechanisms distinct.
+`Regina.Boundary3` keeps Regina's two boundary mechanisms distinct. A real
+boundary component is a connected collection of unpaired global facets, where
+adjacency is through shared global boundary edges. An ideal boundary component
+is the explicit link surface of an ideal global vertex.
 
-A real boundary component is a connected collection of unpaired global facets,
-where adjacency is through shared global boundary edges. An ideal boundary
-component is the explicit link surface of an ideal global vertex.
-
-`Regina.BoundaryClassification3` now computes real-boundary orientation instead
-of leaving it unknown. Each boundary triangle receives the canonical cyclic
-edge directions
+`Regina.BoundaryClassification3` computes real-boundary orientation. Each
+boundary triangle receives the canonical cyclic edge directions
 
 ```text
 (v1,v2), (v2,v0), (v0,v1).
 ```
 
-Every directed side is compared with the ordered endpoint convention of its
-global edge class. Across a shared edge, equal canonical directions require the
-neighboring triangle orientation to flip; opposite directions preserve it.
-Finite reachability in the doubled graph `(boundary facet, sign)` detects a
-conflicting return and therefore nonorientability. The analysis refuses to
-classify orientation unless all side labels resolve and every boundary edge has
-exactly two incident side occurrences.
+Across a shared edge, equal canonical directions require the neighboring
+triangle orientation to flip; opposite directions preserve it. Finite
+reachability in `(boundary facet, sign)` detects a conflicting return.
 
-A connected closed surface is then classified from orientation and Euler
-characteristic:
+`Regina.BoundaryLabels3` now exports the actual assignment relative to the
+positive root facet. Every facet receives one of four explicit states:
 
-- orientable: `χ = 2 - 2g`;
-- nonorientable: `χ = 2 - k`.
+```text
+positive
+negative
+conflicting
+unreachable
+```
 
-Checked boundary results:
+The assignment is reported complete only when every side label resolves, every
+boundary edge has exactly two incident side occurrences, and every facet has a
+unique reachable sign.
+
+A connected closed surface is classified using `χ = 2 - 2g` for orientable
+surfaces and `χ = 2 - k` for nonorientable surfaces.
 
 | Triangulation | Derived boundary classification |
 |---|---|
@@ -141,8 +147,46 @@ Checked boundary results:
 | 3D ball bundle | one real orientable torus, `(V,E,F)=(1,3,2)`, `χ=0`, genus 1 |
 | figure-eight knot complement | one ideal orientable torus, `(V,E,F)=(4,12,8)`, `χ=0`, genus 1 |
 
-See [`BOUNDARY-ORIENTATION.md`](BOUNDARY-ORIENTATION.md) for the exact
-orientation compatibility rule and failure boundary.
+## Three-dimensional validity
+
+`Regina.Validity3` packages the checks that set Regina's three-dimensional
+`valid_` flag at the pinned source revision:
+
+1. reciprocal facet adjacency and inverse gluing permutations;
+2. no global edge identified with itself in reverse;
+3. every vertex lying in a real boundary facet has link Euler characteristic
+   `1`, as required for a disc link.
+
+A non-boundary vertex with link Euler characteristic `2` is finite. Any other
+non-boundary vertex is ideal; it is still valid because Regina allows arbitrary
+closed 2-manifold vertex links in dimension three. The separate `standard`
+flag requires an ideal link to have Euler characteristic `0`.
+
+Invalidity reasons are explicit values:
+
+```text
+inconsistent_facet_pairings
+reversed_edge_identification
+invalid_real_boundary_vertex_link
+```
+
+The report also keeps mathematical validity separate from the completeness of
+additional translated structures. It independently states whether every
+explicit vertex-link corner and side resolved, every link-side pairing was
+reciprocal, and every real-boundary orientation assignment completed.
+
+Checked reports:
+
+| Triangulation | Valid | Orientable | Ideal | Standard | Invalidity reasons |
+|---|---:|---:|---:|---:|---|
+| `ball 3` | yes | yes | no | yes | none |
+| `sphere 3` | yes | yes | no | yes | none |
+| 3D ball bundle | yes | yes | no | yes | none |
+| figure-eight knot complement | yes | yes | yes | yes | none |
+| reversed-edge fixture | no | — | — | — | `reversed_edge_identification` |
+
+See [`VALIDITY3.md`](VALIDITY3.md) for the source correspondence and exact
+claim boundary.
 
 ## Exact boundary
 
@@ -151,10 +195,13 @@ The current work still omits:
 - Regina's standard-dimension face-number lookup tables and legacy embedding labels;
 - exact codimension-two path/cycle appearance order;
 - Regina's packed `Perm<3>` serialization for link-triangle side gluings;
-- explicit orientation labels exported on every real boundary face;
-- higher-dimensional link-manifold recognition and bad-link flags;
-- the complete `isValid()` implementation;
+- the mutable cached C++ face objects and their exact `whyInvalid()` bit layout;
+- higher-dimensional link-manifold recognition and validity;
 - normal surfaces and hypersurfaces, homology, fundamental groups, Pachner moves, recognition, isomorphism signatures, geometry, GUI code, and native bindings.
+
+The source-shaped validity report is specific to dimension three. It does not
+claim the complete generic `Triangulation<dim>::isValid()` implementation in all
+standard dimensions.
 
 The simplex count is fixed in the Agda type. State changes are immutable.
 Packed integers, pointers, mutation notifications, caches, and Regina's
@@ -170,7 +217,7 @@ agda --safe --without-K --ignore-interfaces \
   -i agda agda/Regina/All.agda
 ```
 
-The aggregate checks **26 local modules and 159 concrete reduction
+The aggregate checks **30 local modules and 169 concrete reduction
 assertions**:
 
 - `Regina.PermutationTests`: 16;
@@ -183,7 +230,9 @@ assertions**:
 - `Regina.Link3Tests`: 12;
 - `Regina.VertexLinkTests`: 8;
 - `Regina.BoundaryTests`: 7;
-- `Regina.BoundaryOrientationTests`: 8.
+- `Regina.BoundaryOrientationTests`: 8;
+- `Regina.BoundaryLabelTests`: 4;
+- `Regina.ValidityTests`: 6.
 
 See [`VERIFICATION.txt`](VERIFICATION.txt) and the branch workflow for the
 recorded run.
@@ -193,10 +242,10 @@ recorded run.
 Thank you to **Benjamin A. Burton**—credited as **Ben Burton** in the translated
 source headers—for Regina and the translated permutation, triangulation,
 component, orientation, skeleton, dual-forest, face-embedding, link,
-three-dimensional vertex-link, and boundary-component algorithms. Thank you to
-**Ryan Budney** and **William Pettersson** for their work on Regina. Thank you to
-**Richard Rannard** for the figure-eight construction credited by Regina to
-chapter 8 of his PhD thesis.
+three-dimensional vertex-link, boundary-component, and validity algorithms.
+Thank you to **Ryan Budney** and **William Pettersson** for their work on Regina.
+Thank you to **Richard Rannard** for the figure-eight construction credited by
+Regina to chapter 8 of his PhD thesis.
 
 These acknowledgments do not replace Regina's complete contributor and citation
 records. The translated material follows the repository's existing
