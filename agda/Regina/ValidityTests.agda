@@ -21,6 +21,7 @@ private
       observed_orientable : Bool
       observed_ideal : Bool
       observed_standard : Bool
+      observed_exact_edge_order_complete : Bool
       observed_tetrahedron_faces_complete : Bool
       observed_explicit_links_complete : Bool
       observed_boundary_orientations_complete : Bool
@@ -32,6 +33,7 @@ private
     (report_triangulation_orientable currentReport)
     (report_triangulation_ideal currentReport)
     (report_triangulation_standard currentReport)
+    (report_exact_edge_link_order_complete currentReport)
     (report_tetrahedron_face_mappings_complete currentReport)
     (report_explicit_vertex_links_complete currentReport)
     (report_real_boundary_orientations_complete currentReport)
@@ -48,25 +50,25 @@ private
 
 ball_validity_report_checked :
   observeTriangulation (ball 3) ≡
-    validity_observation true true false true true true true 0
+    validity_observation true true false true true true true true 0
 ball_validity_report_checked = refl
 
 sphere_validity_report_checked :
   map_outcome observeTriangulation (sphere 3) ≡
     accepted
-      (validity_observation true true false true true true true 0)
+      (validity_observation true true false true true true true true 0)
 sphere_validity_report_checked = refl
 
 ball_bundle_validity_report_checked :
   map_outcome observeTriangulation three_dimensional_ball_bundle ≡
     accepted
-      (validity_observation true true false true true true true 0)
+      (validity_observation true true false true true true true true 0)
 ball_bundle_validity_report_checked = refl
 
 figure_eight_validity_report_checked :
   map_outcome observeTriangulation figure_eight_knot_complement ≡
     accepted
-      (validity_observation true true true true true true true 0)
+      (validity_observation true true true true true true true true 0)
 figure_eight_validity_report_checked = refl
 
 reversed_edge_fixture_is_invalid :
