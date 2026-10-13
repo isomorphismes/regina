@@ -1,0 +1,9 @@
+source_path	entity	translated_module	scope
+engine/surface/triangles.cpp	NormalSurface::reconstructTriangles	Regina.NormalTriangleReconstruction3	quad/quad-octagon triangle recovery; finite minimum normalisation; infinity at conflicting vertex equations
+engine/triangulation/detail/moves-impl.h	internalPachner; movePerm_3_1; movePerm_3_2	Regina.PachnerRegion3; Regina.PachnerMoves3	all four dimension-three moves; source frames; exterior gluings; locks; reverse creation order
+engine/triangulation/isomorphism.h	Isomorphism::operator(); inverse; composition	Regina.Relabelling	dimension-indexed simplex and per-simplex vertex permutations; transported locks
+engine/triangulation/detail/isosig-impl.h	IsoSigData<1,dim>::fillFrom; TriangulationBase::isoSig	Regina.IsomorphismSignature	generic classical canonical traversal; exhaustive root/permutation candidates; sorted components; lock-aware/free choices
+engine/utilities/sigutils.h	Base64Encoder; Base64Decoder	Regina.SignatureEncoding; Regina.SignatureDecoding	base64 alphabet; integer width; little-endian digits; trits; surrounding whitespace; checked ranges
+engine/triangulation/detail/isosig-impl.h	fillComponentFromSig1; classical fromSig branch	Regina.ClassicalSignatureReader	actual component reconstruction; reciprocal joins; locks; explicit rejection of second-generation input
+engine/triangulation/detail/isosig-impl.h	fromSig component append	Regina.DisjointUnion	bounded sum indices; independent component adjacency and lock transfer
+python/testsuite/signatures.out	figure-eight classical signature oracle	Regina.IsomorphismSignatureTests; Regina.ClassicalSignatureReaderTests	pinned source fixture cPcbbbiht; not a fresh C++ differential run

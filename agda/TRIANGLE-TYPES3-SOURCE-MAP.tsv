@@ -1,0 +1,7 @@
+Agda operation	Source file	Source lines	Source commit	Translation boundary
+TriangleClassification; triangleTypeCode	engine/triangulation/face.h	69-122	e3a5c7c0e0581706d9e5531b750160b322489950	Eight computed types and exact codes 1-8; Unknown cache state is absent
+classifyTriangleIncidence	engine/triangulation/face.h	2037-2095	e3a5c7c0e0581706d9e5531b750160b322489950	Same class-equality decisions, sign comparisons, cyclic subtype positions, and branch priority; pure result without mutable cache
+triangleIncidence; triangleClassification	engine/triangulation/face.h	1930-1980;1285-1295	e3a5c7c0e0581706d9e5531b750160b322489950	Dimension-three vertex and edge references with inherent mapping signs; failed lookup or badly identified edge returns nothing instead of undefined behavior
+triangleSubtype	engine/triangulation/face.h	2097-2103	e3a5c7c0e0581706d9e5531b750160b322489950	Maybe (Fin 3) represents special position 0-2 or source sentinel -1
+formsMobiusBand	engine/triangulation/face.h	2105-2117	e3a5c7c0e0581706d9e5531b750160b322489950	True for L31, DunceHat, and Mobius
+formsCone	engine/triangulation/face.h	2120-2132	e3a5c7c0e0581706d9e5531b750160b322489950	True for DunceHat, Cone, and Horn; overlaps formsMobiusBand

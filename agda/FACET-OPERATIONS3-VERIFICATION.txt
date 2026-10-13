@@ -1,0 +1,57 @@
+REGINA AGDA FACE OPERATIONS — LOCAL AGGREGATE VERIFICATION
+
+Checked at: 2026-10-12 16:19 UTC
+Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
+Base fork commit: 7fe620d3f0824d8786de413a143b54c8ccf37949
+Implementation parent: db0c2db104e113789bcc223f45d4f48000e2f404
+Repository: https://github.com/isomorphismes/regina
+Local implementation branch: agda-boundary-facet-operations
+Target: disposable Ubuntu 24.04 x86_64 container
+Compiler: Agda 2.6.3
+Compiler executable SHA-256: 852806142a15951f667df303c73cfce5f4123218ce6e1f1b29acaddc242af00d
+
+Aggregate check: PASS
+Exit code: 0
+Local modules checked: 44
+Top-level concrete reduction assertions: 277
+New permutation-extension assertions: 5
+New face-operation assertions: 22
+General proofs are additional to these assertion counts.
+
+Command (repository root, with Agda builtin data configured):
+agda --safe --without-K --ignore-interfaces --no-libraries --no-default-libraries -i agda agda/Regina/All.agda
+
+Changed Agda input SHA-256 values:
+6b92b23d17b4e5bd4077dc20125d503b643954e28f1bd5e5566d3469c32f2093  agda/Regina/PermutationExtension.agda
+02ca15b495b98cd376c65fcf3afb6e6a01449e4a0bbcc50c2e26ed0063a9e726  agda/Regina/PermutationExtensionTests.agda
+17c047af87571d21f53da0732f511fe8ecefcac42e0494aedfeadd73df12d2da  agda/Regina/FacetOperations3.agda
+a52ff827e57028e6dd37fcc02ece3b6d7dca80dec16e1aba022323f161e777a7  agda/Regina/FacetOperationTests.agda
+9b77f450dd8ac74e870a3c442a64d4dc046925b04077c61bb309305bae268d78  agda/Regina/All.agda
+Other implementation and test inputs are anchored by the implementation parent.
+
+The run checked every module with fresh interfaces, using Agda builtins only.
+No postulate, unsafe termination escape, or K equality principle supplied the
+results. Concrete computation was exercised by Agda reduction.
+
+The generic permutation extension preserves every initial image and fixes the
+new final index. Its inverse laws, preservation of identity and composition,
+and commutation with inverse are proved for arbitrary finite degree.
+
+The face-gluing frame expression is proved to carry every inherent triangle
+vertex to its specified destination and the opposite vertex to the opposite
+vertex. Reversing the inherent map and exchanging the frames is proved equal
+pointwise to the complete inverse local gluing. An identity gluing under one
+frame is proved to give the identity local map.
+
+The reductions cover all six triangle permutations, repeated extension,
+inverse images, small finite degrees, the original ball-bundle gluing and its
+triangle classification, distinct-tetrahedron cyclic gluing and its reciprocal
+inverse, merged global face classes, source and destination locks, reciprocal
+lock/unlock changes, repeated-lock no-ops, same-face and occupied-face failure
+priority, absent indices, and the empty triangulation.
+
+This is local type-checking and reduction evidence. It does not claim a new
+hosted CI run, native execution, C++ differential testing, manifold recognition,
+generic all-dimensional Face operations, packed-code equivalence, or complete
+Regina conversion. The cumulative patch also contains the earlier checked
+triangle-classification implementation.

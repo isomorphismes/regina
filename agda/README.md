@@ -16,6 +16,7 @@ history moved with the repository transfer.
 |---|---|
 | [`Regina.Foundation`](Regina/Foundation.agda) | Finite indices, vectors, lists, equality, and proof-producing finite decisions. |
 | [`Regina.Permutation`](Regina/Permutation.agda) | Finite permutations, inverse, composition, conjugation, checked image tables, and pointwise laws. |
+| [`Regina.PermutationExtension`](Regina/PermutationExtension.agda) | Append a fixed vertex label at any finite degree; proved image preservation, inverse, identity, and composition laws. |
 | [`Regina.Triangulation`](Regina/Triangulation.agda) | Dimension-indexed simplices, reciprocal facet gluings, locks, immutable transitions, and consistency certificates. |
 | [`Regina.Input`](Regina/Input.agda) | Checked natural-number indices and permutation tables, applied in Regina's failure order. |
 | [`Regina.Examples`](Regina/Examples.agda) | Regina's ball, sphere, ball-bundle, and figure-eight constructions. |
@@ -33,8 +34,27 @@ history moved with the repository transfer.
 | [`Regina.BoundaryClassification3`](Regina/BoundaryClassification3.agda) | Real-boundary orientation propagation and closed-surface classification. |
 | [`Regina.BoundaryLabels3`](Regina/BoundaryLabels3.agda) | Canonical positive or negative orientation labels for every real-boundary facet, plus explicit conflict and unresolved states. |
 | [`Regina.FaceProperties3`](Regina/FaceProperties3.agda) | Dimension-three `Face` API observations: invalidity bits, boundary/internal/link properties, ideal and standard vertices, degrees, Euler characteristics, and maximal-forest triangles. |
+| [`Regina.TriangleTypes3`](Regina/TriangleTypes3.agda) | All eight triangle quotient types, their special vertex or edge roles, and the overlapping cone and Möbius-band predicates. |
+| [`Regina.FacetOperations3`](Regina/FacetOperations3.agda) | Face-level gluing, locking, unlocking, and lock queries, with proved conversion from inherent triangle labels to local tetrahedron labels. |
 | [`Regina.Validity3`](Regina/Validity3.agda) | A reasoned dimension-three validity report plus separate reconstruction-completeness diagnostics. |
+| [`Regina.PermutationContraction`](Regina/PermutationContraction.agda) | Checked restriction of a permutation, with proofs of every retained image and the fixed final image. |
+| [`Regina.BoundaryTriangulation3`](Regina/BoundaryTriangulation3.agda) | Actual certified real-boundary triangle triangulations, using the composed maps between directed edge-link ends. |
+| [`Regina.VertexLinkTriangulation3`](Regina/VertexLinkTriangulation3.agda) | Certified vertex-link triangle triangulations and their inclusion frames. |
+| [`Regina.Integer`](Regina/Integer.agda), [`Regina.IntegerMatrix`](Regina/IntegerMatrix.agda) | Exact integers, both division conventions, dimension-indexed matrices, and proof-producing entrywise equality. |
+| [`Regina.SmithNormalForm`](Regina/SmithNormalForm.agda) | Smith reduction with both integral basis changes, both inverses, entrywise equivalence proofs, and explicit exhaustion. |
+| [`Regina.AbelianGroup`](Regina/AbelianGroup.agda), [`Regina.ChainHomology`](Regina/ChainHomology.agda) | Invariant factors and kernel/image homology, with the next map transported into the kernel basis. |
+| [`Regina.DualPresentation3`](Regina/DualPresentation3.agda) | First homology and raw fundamental-group presentations from the dual forest and exact internal-edge walks. |
+| [`Regina.PrimalBoundary`](Regina/PrimalBoundary.agda) | Dimension-generic primal boundary maps and quotient homology, including ideal vertices. |
+| [`Regina.DualBoundary3`](Regina/DualBoundary3.agda) | Three-dimensional dual boundary maps and H₀–H₃ of the truncated manifold. |
+| [`Regina.NormalCoordinates3`](Regina/NormalCoordinates3.agda), [`Regina.NormalMatching3`](Regina/NormalMatching3.agda) | Standard, quadrilateral, almost-normal and quad-octagon matching equations; local compatibility and enumeration admissibility. |
+| [`Regina.NormalSurface3`](Regina/NormalSurface3.agda) | Certified admissible vectors, edge weights, arc counts, and Euler characteristic from finite triangle coordinates. |
+| [`Regina.NormalVertices3`](Regina/NormalVertices3.agda), [`Regina.NormalFundamentals3`](Regina/NormalFundamentals3.agda) | Exact finite reference enumeration of primitive vertex rays and fundamental integral vectors; exhaustive algorithms rather than Regina's optimized enumeration engines. |
 | [`Regina.All`](Regina/All.agda) | Aggregate entry point for all implementation and reduction-test modules. |
+| [`Regina.NormalTriangleReconstruction3`](Regina/NormalTriangleReconstruction3.agda) | Minimal finite triangle coordinates, infinite triangles at conflicting vertex links, preserved quad/octagon counts, and proof-carrying matching/normalisation checks. |
+| [`Regina.PachnerRegion3`](Regina/PachnerRegion3.agda), [`Regina.PachnerMoves3`](Regina/PachnerMoves3.agda) | Checked 1–4, 2–3, 3–2, and 4–1 moves with exterior gluings, source creation order, and facet-lock transfer. |
+| [`Regina.Relabelling`](Regina/Relabelling.agda), [`Regina.DisjointUnion`](Regina/DisjointUnion.agda) | Dimension-indexed simplex/vertex relabellings, inverses/composition, and component union with transported locks. |
+| [`Regina.SignatureEncoding`](Regina/SignatureEncoding.agda), [`Regina.SignatureDecoding`](Regina/SignatureDecoding.agda) | Regina base64 characters, little-endian integers, facet trits, and classical signature parsing. |
+| [`Regina.IsomorphismSignature`](Regina/IsomorphismSignature.agda), [`Regina.ClassicalSignatureReader`](Regina/ClassicalSignatureReader.agda) | All-dimensional classical signature minimisation and reconstruction, including locks and disconnected components. |
 
 Source maps:
 
@@ -50,6 +70,9 @@ Source maps:
 - [`BOUNDARY-ORIENTATION-SOURCE-MAP.tsv`](BOUNDARY-ORIENTATION-SOURCE-MAP.tsv): real-boundary orientation and surface classification;
 - [`VALIDITY3-SOURCE-MAP.tsv`](VALIDITY3-SOURCE-MAP.tsv): exported boundary-facet labels and the dimension-three validity report;
 - [`FACE-PROPERTIES3-SOURCE-MAP.tsv`](FACE-PROPERTIES3-SOURCE-MAP.tsv): the dimension-three face-property layer.
+- [`TRIANGLE-TYPES3-SOURCE-MAP.tsv`](TRIANGLE-TYPES3-SOURCE-MAP.tsv): triangle type, subtype, cone, and Möbius-band recognition.
+- [`FACET-OPERATIONS3-SOURCE-MAP.tsv`](FACET-OPERATIONS3-SOURCE-MAP.tsv): permutation extension and face-level gluing and locks.
+- [`MATHEMATICAL-ENGINE-SOURCE-MAP.tsv`](MATHEMATICAL-ENGINE-SOURCE-MAP.tsv): boundary/link construction, integer algebra, chain maps, and normal-surface machinery.
 
 ## Certified gluing core
 
@@ -225,13 +248,49 @@ The current work still omits:
 - higher-dimensional face-numbering tables and link-manifold recognition;
 - Regina's packed `Perm<3>` serialization for link-triangle side gluings;
 - mutable C++ objects, pointer identity, caches, invalidation, and notification behavior;
-- triangle combinatorial-type recognition;
-- normal surfaces and hypersurfaces, homology, fundamental groups, Pachner moves, recognition, isomorphism signatures, geometry, GUI code, and native bindings.
+- closed-cusp slope equations, cutting/crushing, normal-surface topology, and normal hypersurfaces;
+- relative homology, higher-dimensional truncated dual complexes, fundamental-group Tietze simplification, higher-dimensional Pachner moves, general recognition, second-generation/binary signatures, geometry, GUI code, and native bindings.
 
-The source-shaped validity, face-property, subface, tetrahedron-face, and exact
-edge-order reports are specific to dimension three.
+The source-shaped validity, face-property, triangle-type, subface,
+tetrahedron-face, and exact edge-order reports are specific to dimension three.
+Generic primal chain maps do not supply higher-dimensional link recognition.
+See [`MATHEMATICAL-ENGINE.md`](MATHEMATICAL-ENGINE.md) and
+[`CORE-CONTINUATION-20261013.md`](CORE-CONTINUATION-20261013.md) for the algorithms,
+their precise success conditions, and the remaining port boundary.
+
+## Triangle identifications
+
+`Regina.TriangleTypes3` translates Regina's eight triangle types and their
+numeric codes: ordinary triangle (1), scarf (2), parachute (3), cone (4),
+Möbius band (5), horn (6), dunce hat (7), and the `L(3,1)` spine (8).
+Recognition reads the actual global vertex and edge classes and the signs of
+the inherent edge mappings. The result stores a bounded special vertex or
+edge number only for types that have one. An absent special role corresponds
+to Regina's `-1` subtype sentinel.
+
+The ball and sphere contain ordinary triangles. The three-dimensional ball
+bundle has one Möbius triangle and two parachutes; the figure-eight complement
+has four horn triangles. Both `formsCone` and `formsMobiusBand` hold for a dunce
+hat, following Regina's overlapping predicates.
+
+The checked lookup returns `nothing` for a missing triangle or an incident
+edge with a reversed self-identification. Regina leaves the latter case
+undefined. See [`TRIANGLE-TYPES3.md`](TRIANGLE-TYPES3.md) for the exact input,
+mapping conventions, and scope.
 
 ## Check
+
+`Regina.FacetOperations3` implements `Face<3,2>::join()` from the inherent
+labels of two global triangles. It resolves both frames in the current state
+and computes `destinationFrame * extend(inherentGluing) * sourceFrame.inverse()`.
+General proofs establish the intended image of every triangle vertex and of
+the opposite vertex, as well as the full inverse when the gluing is reversed.
+The existing certified join retains Regina's occupancy, same-face, and lock
+checks. Paired face locks update both local facets.
+
+See [`FACET-OPERATIONS3.md`](FACET-OPERATIONS3.md). A successful edit produces a
+new immutable triangulation; global class indices must be resolved in that new
+state rather than treated as persistent C++ face objects.
 
 Target: Agda 2.6.3, builtins only.
 
@@ -241,10 +300,11 @@ agda --safe --without-K --ignore-interfaces \
   -i agda agda/Regina/All.agda
 ```
 
-The aggregate checks **38 local modules and 228 concrete reduction
+The aggregate checks **82 local modules and 464 concrete reduction
 assertions**:
 
 - `Regina.PermutationTests`: 16;
+- `Regina.PermutationExtensionTests`: 5;
 - `Regina.TriangulationTests`: 48;
 - `Regina.ComponentTests`: 9;
 - `Regina.DualForestTests`: 10;
@@ -260,10 +320,32 @@ assertions**:
 - `Regina.BoundaryOrientationTests`: 8;
 - `Regina.BoundaryLabelTests`: 4;
 - `Regina.FacePropertyTests`: 13;
+- `Regina.TriangleTypeTests`: 22;
+- `Regina.FacetOperationTests`: 22;
 - `Regina.ValidityTests`: 6.
+- `Regina.BoundaryTriangulationTests`: 9;
+- `Regina.VertexLinkTriangulationTests`: 5;
+- `Regina.SmithNormalFormTests`: 18;
+- `Regina.HomologyTests`: 14;
+- `Regina.PrimalBoundaryTests`: 10;
+- `Regina.DualBoundaryTests`: 8;
+- `Regina.NormalSurfaceTests`: 19;
+- `Regina.NormalVertexTests`: 6;
+- `Regina.NormalFundamentalTests`: 6.
+- `Regina.NormalTriangleReconstructionTests`: 20;
+- `Regina.PachnerTests`: 20;
+- `Regina.IsomorphismSignatureTests`: 22;
+- `Regina.ClassicalSignatureReaderTests`: 30.
 
-See [`VERIFICATION.txt`](VERIFICATION.txt) and the branch workflow for the
-recorded run.
+See [`VERIFICATION.txt`](VERIFICATION.txt) for the earlier branch run and
+[`TRIANGLE-TYPES3-VERIFICATION.txt`](TRIANGLE-TYPES3-VERIFICATION.txt) for the
+triangle-recognition check, and
+[`FACET-OPERATIONS3-VERIFICATION.txt`](FACET-OPERATIONS3-VERIFICATION.txt) for
+the current local aggregate check.
+[`MATHEMATICAL-ENGINE-VERIFICATION.txt`](MATHEMATICAL-ENGINE-VERIFICATION.txt)
+records the 69-module continuation.
+[`CORE-CONTINUATION-20261013-VERIFICATION.txt`](CORE-CONTINUATION-20261013-VERIFICATION.txt)
+records the subsequent aggregate check. Earlier receipts remain historical.
 
 ## Attribution and license
 
@@ -271,7 +353,17 @@ Thank you to **Benjamin A. Burton**—credited as **Ben Burton** in the translat
 source headers—for Regina and the translated permutation, triangulation,
 component, orientation, skeleton, dual-forest, face-embedding, exact edge-link,
 subface, tetrahedron-face, link, three-dimensional vertex-link,
-boundary-component, face-property, and validity algorithms. Thank you to
+boundary-component, face-property, triangle-classification, face-gluing,
+permutation-extension, and validity algorithms. Thank you to
+Ben Burton for the translated matrix, abelian-group, primal/dual chain-map,
+boundary/link construction, and normal-surface matching and coordinate
+semantics. The exhaustive normal-surface enumeration algorithms are Agda
+reference implementations of the mathematical output, not copies of Regina's
+optimized implementations. Thank you to
+Ben Burton for triangle reconstruction, Pachner transitions, relabellings,
+signature discovery, and signature encodings and readers. Signature root
+permutation enumeration is exhaustive reference code; Regina's pruning and
+packed representations are not claimed. Thank you to
 **Ryan Budney** and **William Pettersson** for their work on Regina. Thank you to
 **Richard Rannard** for the figure-eight construction credited by Regina to
 chapter 8 of his PhD thesis.

@@ -1,0 +1,18 @@
+Regina source at e3a5c7c0e0581706d9e5531b750160b322489950	Agda module	Relationship and boundary
+maths/perm.h: Perm<n>::contract	Regina.PermutationContraction	Checked one-final-vertex restriction; proof of retained images; rejects failed preconditions
+triangulation/detail/boundarycomponent-impl.h: buildRealBoundary,139-202	Regina.BoundaryTriangulation3	Five-factor endpoint gluing and certified triangle pairing; component-local simplex order; no mutable lower-face relabelling
+triangulation/dim3/vertex3.cpp: buildLink/buildLinkInclusion	Regina.VertexLinkTriangulation3	Contracted triangle gluing and inclusion frames; immutable result; no packed Perm<3> codes
+maths/integer.h: operator arithmetic and divisionAlg	Regina.Integer	Exact finite integers; separate truncating and Euclidean division; no LargeInteger infinity
+maths/matrix.h: entry/product/elementary operations	Regina.IntegerMatrix	Dimension-indexed dense matrices; pointwise equality decisions; no mutable caches
+maths/matrix.cpp: smithNormalForm/smithNormalFormCoB	Regina.SmithNormalForm	Euclidean elementary-operation reference algorithm; certified integral bases and inverses; fuel exhaustion is failure
+algebra/abeliangroup.cpp: matrix constructors	Regina.AbelianGroup/Regina.ChainHomology	Invariant factors and kernel/image quotient; transports next map by right-basis inverse; rejects nonchain maps
+triangulation/detail/algebra-impl.h: homology<1>,53-139; group,185-249	Regina.DualPresentation3	3D dual forest/ordered-edge relations; raw group presentation before Tietze simplification
+triangulation/detail/algebra-impl.h: boundaryMap,256-341	Regina.PrimalBoundary	Generic signed incidence with semantic local-face lookup; quotient includes ideal vertices
+triangulation/detail/algebra-impl.h: dualBoundaryMap,346-428	Regina.DualBoundary3	3D complementary orientation signs; omits real/ideal boundary faces; H0-H3 via certified chain homology
+triangulation/example3.cpp: rp2xs1,53-69	Regina.Examples	Exact six source gluings; nonorientable torsion acceptance fixture
+surface/normalcoords.h; surface/normalsurface.h: quadSeparating/quadMeeting	Regina.NormalCoordinates3	Four finite coordinate encodings; typed quad lookup; local embeddedness and compatibility
+surface/matching.cpp: makeEmbeddedConstraints,39-70	Regina.NormalCoordinates3	Separate local quad/octagon and global octagon-support constraints
+surface/matching.cpp: makeMatchingEquations,73-176	Regina.NormalMatching3	Standard/AlmostNormal/Quad/QuadOct equations; repeated coordinates accumulate; no QuadClosed/SnapPea slope equations
+surface/normalsurface.cpp: edgeWeight/arcs,61-103; calculateEulerChar,308-335	Regina.NormalSurface3	Finite full-coordinate cell counts; quad-only Euler returns nothing pending triangle reconstruction
+surface/enumerator.cpp: vertex enumeration mathematical output	Regina.NormalVertices3	Exhaustive admissible supports plus certified one-dimensional integral kernels; different algorithm from optimized double description
+surface/enumerator.cpp: fundamental enumeration mathematical output	Regina.NormalFundamentals3	Finite primitive-ray coordinate bounds and exact indecomposability; different algorithm from optimized Hilbert/Normaliz engines

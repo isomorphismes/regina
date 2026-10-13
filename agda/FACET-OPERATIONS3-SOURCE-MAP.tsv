@@ -1,0 +1,7 @@
+Agda operation	Source file	Source lines	Source commit	Translation boundary
+extendPermutation	engine/maths/perm.h	1282-1301;2602-2605	e3a5c7c0e0581706d9e5531b750160b322489950	Append one fixed final label at arbitrary finite degree; repeated extension adds more; preserve image, identity, composition, and inverse laws by proof; no packed codes
+facetFrame; framedFacet	engine/triangulation/face.h	2019-2020;2135-2151	e3a5c7c0e0581706d9e5531b750160b322489950	First ordered embedding resolves a global triangle class to local simplex and opposite vertex; absent lookup is an explicit failure
+facetGluingMapping; joinBoundaryFacets	engine/triangulation/face.h	2014-2025	e3a5c7c0e0581706d9e5531b750160b322489950	Destination frame composed with extended inherent map and inverse source frame, followed by the existing certified join; dimension three
+lockFacetFace	engine/triangulation/face.h	2133-2138	e3a5c7c0e0581706d9e5531b750160b322489950	Resolve current global facet then delegate to existing reciprocal facet locking
+unlockFacetFace	engine/triangulation/face.h	2140-2145	e3a5c7c0e0581706d9e5531b750160b322489950	Resolve current global facet then delegate to existing reciprocal facet unlocking
+facetFaceIsLocked	engine/triangulation/face.h	2147-2152	e3a5c7c0e0581706d9e5531b750160b322489950	Read the resolved local facet lock; absent global class reports failure instead of a default Boolean

@@ -1,0 +1,42 @@
+REGINA AGDA TRIANGLE CLASSIFICATION — LOCAL AGGREGATE VERIFICATION
+
+Checked at: 2026-10-12 05:34 UTC
+Source baseline: e3a5c7c0e0581706d9e5531b750160b322489950
+Base fork commit: 7fe620d3f0824d8786de413a143b54c8ccf37949
+Repository: https://github.com/isomorphismes/regina
+Local implementation branch: agda-triangle-classification
+Target: disposable Linux x86_64 container
+Compiler: Agda 2.6.3
+Compiler executable SHA-256: 852806142a15951f667df303c73cfce5f4123218ce6e1f1b29acaddc242af00d
+
+Aggregate check: PASS
+Exit code: 0
+Local modules checked: 40
+Concrete reduction assertions: 250
+New triangle-type assertions: 22
+
+Command (from repository root, with Agda builtin data configured):
+agda --safe --without-K --ignore-interfaces --no-libraries --no-default-libraries -i agda agda/Regina/All.agda
+
+Changed Agda input SHA-256 values:
+54411aaf9fcf70d7c02b52bb2761c8c87693eb99f2caaeab424b3384c2aa1c65  agda/Regina/TriangleTypes3.agda
+0c0a5d9934133b7a1a40e0874902accb6fa7ef33b8d8883ed6e6298ede9c416a  agda/Regina/TriangleTypeTests.agda
+da3447dea809a493eee27a6d3b5bafb2458ab544810c9306f13d16c701bb22a6  agda/Regina/All.agda
+Unchanged implementation and test inputs are anchored by the base fork commit.
+
+Every module was checked with fresh interfaces. Only Agda builtins were used;
+no Agda standard library, unsafe postulate, termination escape, or K equality
+principle supplied the result. Computation was exercised by Agda reduction.
+
+The new subsystem translates triangleType(), triangleSubtype(), formsCone(),
+and formsMobiusBand() through the existing dimension-three global face and
+subface lookup path. All eight types, all special positions, every all-edge
+sign pattern, numeric codes, overlapping predicates, absent indices, and the
+empty triangulation were checked. The ball, sphere, ball-bundle, and figure-eight
+examples resolve; the ball-bundle and figure-eight exact types and subtypes
+are checked. A reversed-edge self-identification blocks incident recognition.
+
+This is local type checking and reduction evidence. No new hosted CI run,
+native compiled executable, C++ differential test, general correspondence
+proof to Regina, higher-dimensional lookup, or complete Regina conversion
+is claimed. The earlier hosted receipt remains in VERIFICATION.txt.

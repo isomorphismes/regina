@@ -50,3 +50,14 @@ figure_eight_knot_complement = from_input_gluings false 3 2
    input_gluing 0 1 1 (2 ∷ 0 ∷ 3 ∷ 1 ∷ []) ∷
    input_gluing 0 2 1 (0 ∷ 3 ∷ 2 ∷ 1 ∷ []) ∷
    input_gluing 0 3 1 (2 ∷ 1 ∷ 0 ∷ 3 ∷ []) ∷ [])
+
+-- Example<3>::rp2xs1(), example3.cpp, 53-69. Regina credits section
+-- 3.5.1 of Benjamin Burton's PhD thesis for this construction.
+projective_plane_times_circle : Outcome (Triangulation 3 3)
+projective_plane_times_circle = from_input_gluings false 3 3
+  (input_gluing 1 0 0 (0 ∷ 1 ∷ 2 ∷ 3 ∷ []) ∷
+   input_gluing 1 3 0 (3 ∷ 0 ∷ 1 ∷ 2 ∷ []) ∷
+   input_gluing 1 1 2 (3 ∷ 0 ∷ 1 ∷ 2 ∷ []) ∷
+   input_gluing 1 2 2 (0 ∷ 1 ∷ 2 ∷ 3 ∷ []) ∷
+   input_gluing 0 1 2 (2 ∷ 3 ∷ 0 ∷ 1 ∷ []) ∷
+   input_gluing 0 3 2 (2 ∷ 3 ∷ 0 ∷ 1 ∷ []) ∷ [])
