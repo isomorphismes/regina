@@ -180,7 +180,7 @@ normalise_permutation_indices true currentIndices =
   map (λ currentIndex → 2 * currentIndex + 1) currentIndices
 
 record SecondGenerationData : Set where
-  constructor second_generation_record
+  constructor second_generation_payload
   field
     encoded_oriented : Bool
     encoded_facet_types : List Nat
@@ -200,7 +200,7 @@ decode_after_destinations simplexCount oriented currentDestinations
 ... | true with decode_bit_numbers (join_count simplexCount currentDestinations)
   (permutation_bit_width oriented) (remaining_bits facetResult)
 ... | nothing = nothing
-... | just permutationResult = just (second_generation_record oriented
+... | just permutationResult = just (second_generation_payload oriented
   (reverse_list (bit_value facetResult))
   (decoded_destinations currentDestinations)
   (normalise_permutation_indices oriented (bit_value permutationResult))
