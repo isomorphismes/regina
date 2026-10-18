@@ -147,9 +147,9 @@ locked_figure_eight_recovers_one_simplex_lock :
   read_simplex_locks "cV6cqb.ai" ≡ just 1
 locked_figure_eight_recovers_one_simplex_lock = refl
 
-locked_figure_eight_converts_with_lock_suffix :
+locked_figure_eight_converts_and_keeps_lock_suffix :
   round_trip_to_classical "cV6cqb.ai" ≡ just "cPcbbbiht.aq"
-locked_figure_eight_converts_with_lock_suffix = refl
+locked_figure_eight_converts_and_keeps_lock_suffix = refl
 
 figure_eight_decodes_as_valid : read_validity "cV6cqb" ≡ just true
 figure_eight_decodes_as_valid = refl
