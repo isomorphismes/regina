@@ -106,7 +106,7 @@ reverse_list (headElement ∷ remainingElements) =
   reverse_list remainingElements ++ (headElement ∷ [])
 
 record DestinationData : Set where
-  constructor destination_data
+  constructor destination_result
   field
     decoded_destinations : List Nat
     represented_facet_sides : Nat
@@ -119,12 +119,12 @@ read_destinations : Nat → Nat → Nat → Nat → Nat → Nat → BitCursor �
 read_destinations zero targetSides simplexCount bitWidth representedSides
   boundaryCount currentCursor with less_than representedSides targetSides
 ... | true = nothing
-... | false = just (destination_data [] representedSides boundaryCount
+... | false = just (destination_result [] representedSides boundaryCount
   currentCursor)
 read_destinations (suc remainingFuel) targetSides simplexCount bitWidth
   representedSides boundaryCount currentCursor
   with less_than representedSides targetSides
-... | false = just (destination_data [] representedSides boundaryCount
+... | false = just (destination_result [] representedSides boundaryCount
   currentCursor)
 ... | true with decode_bits bitWidth currentCursor
 ... | nothing = nothing
@@ -134,7 +134,7 @@ read_destinations (suc remainingFuel) targetSides simplexCount bitWidth
   (suc representedSides) (suc boundaryCount)
   (remaining_bits destinationResult)
 ... | nothing = nothing
-... | just remainingResult = just (destination_data
+... | just remainingResult = just (destination_result
   (bit_value destinationResult ∷ decoded_destinations remainingResult)
   (represented_facet_sides remainingResult)
   (boundary_destination_count remainingResult)
@@ -145,7 +145,7 @@ read_destinations (suc remainingFuel) targetSides simplexCount bitWidth
   with read_destinations remainingFuel targetSides simplexCount bitWidth
     (2 + representedSides) boundaryCount (remaining_bits destinationResult)
 ... | nothing = nothing
-... | just remainingResult = just (destination_data
+... | just remainingResult = just (destination_result
   (bit_value destinationResult ∷ decoded_destinations remainingResult)
   (represented_facet_sides remainingResult)
   (boundary_destination_count remainingResult)
@@ -180,13 +180,13 @@ normalise_permutation_indices true currentIndices =
   map (λ currentIndex → 2 * currentIndex + 1) currentIndices
 
 record SecondGenerationData : Set where
-  constructor second_generation_data
+  constructor second_generation_record
   field
     encoded_oriented : Bool
     encoded_facet_types : List Nat
     encoded_destinations : List Nat
     encoded_permutations : List Nat
-    after_component_data : BitCursor
+    after_component_bits : BitCursor
 open SecondGenerationData public
 
 decode_after_destinations : Nat → Bool → DestinationData →
@@ -200,7 +200,7 @@ decode_after_destinations simplexCount oriented currentDestinations
 ... | true with decode_bit_numbers (join_count simplexCount currentDestinations)
   (permutation_bit_width oriented) (remaining_bits facetResult)
 ... | nothing = nothing
-... | just permutationResult = just (second_generation_data oriented
+... | just permutationResult = just (second_generation_record oriented
   (reverse_list (bit_value facetResult))
   (decoded_destinations currentDestinations)
   (normalise_permutation_indices oriented (bit_value permutationResult))
@@ -216,8 +216,8 @@ decode_after_orientation simplexCount oriented currentCursor
 ... | just destinationResult =
   decode_after_destinations simplexCount oriented destinationResult
 
-decode_component_data : Nat → BitCursor → Maybe SecondGenerationData
-decode_component_data simplexCount currentCursor
+decode_component_bits : Nat → BitCursor → Maybe SecondGenerationData
+decode_component_bits simplexCount currentCursor
   with decode_bits 2 currentCursor
 ... | nothing = nothing
 ... | just markerResult with nat_equal (bit_value markerResult) 3
@@ -352,7 +352,7 @@ construct_component simplexCount currentData
 ... | just completedState with unused_facet_types completedState |
   unused_second_destinations completedState |
   unused_second_permutations completedState
-... | [] | [] | [] with flush_zero_padding (after_component_data currentData)
+... | [] | [] | [] with flush_zero_padding (after_component_bits currentData)
 ... | nothing = nothing
 ... | just alignedCursor = read_component_locks
   (second_triangulation completedState) alignedCursor
@@ -362,7 +362,7 @@ construct_component simplexCount currentData | just completedState | _ | _ | _ =
 read_second_generation_component : (simplexCount : Nat) → BitCursor →
   Maybe (BitParsed (Classical.DecodedTriangulation 3))
 read_second_generation_component simplexCount currentCursor
-  with decode_component_data simplexCount currentCursor
+  with decode_component_bits simplexCount currentCursor
 ... | nothing = nothing
 ... | just currentData = construct_component simplexCount currentData
 
