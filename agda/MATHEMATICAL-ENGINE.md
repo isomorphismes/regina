@@ -93,9 +93,10 @@ The subsequent [2026-10-13 continuation](CORE-CONTINUATION-20261013.md)
 implements triangle reconstruction with spun/infinite coordinates, all four
 three-dimensional Pachner moves, and classical signatures and their reader.
 Closed-cusp slope equations, surface topology and cutting/crushing remain
-untranslated. So do
-normal hypersurfaces, higher-dimensional links and recognition, relative
-homology, higher-dimensional truncated dual complexes, Tietze simplification,
+untranslated. A later continuation implements relative and boundary first
+homology in dimension three. Still untranslated are normal hypersurfaces,
+higher-dimensional links and recognition, higher-dimensional truncated dual
+complexes, Tietze simplification,
 higher-dimensional Pachner moves, second-generation/binary signatures,
 geometric engines, broader serialization, GUI and bindings.
 The original source remains pinned to
