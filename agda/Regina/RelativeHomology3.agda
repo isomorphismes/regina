@@ -22,10 +22,10 @@ private
   variable
     simplex_count rows columns : Nat
 
-natMember : Nat → List Nat → Bool
-natMember target [] = false
-natMember target (candidate ∷ remaining) =
-  nat_equal target candidate or natMember target remaining
+relativeNatMember : Nat → List Nat → Bool
+relativeNatMember target [] = false
+relativeNatMember target (candidate ∷ remaining) =
+  nat_equal target candidate or relativeNatMember target remaining
 
 boundaryVertexNumbers : List Properties.VertexProperties3 → List Nat
 boundaryVertexNumbers [] = []
@@ -66,7 +66,7 @@ boundaryCellNumbers currentTriangulation (suc (suc (suc remainingDimension))) = 
 relativeCellIndices : (currentTriangulation : Triangulation 3 simplex_count) →
   (cellDimension : Nat) → List (Fin (cellCount currentTriangulation cellDimension))
 relativeCellIndices currentTriangulation cellDimension = Homology.filter
-  (λ currentIndex → not (natMember (fin_to_nat currentIndex)
+  (λ currentIndex → not (relativeNatMember (fin_to_nat currentIndex)
     (boundaryCellNumbers currentTriangulation cellDimension)))
   (all_fin (cellCount currentTriangulation cellDimension))
 
