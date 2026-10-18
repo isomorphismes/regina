@@ -376,6 +376,7 @@ read_component_sequence (suc remainingFuel) simplexCount currentCursor
 ... | just componentResult with remaining_bits componentResult
 ... | bit_cursor [] zero = just (bit_value componentResult ∷ [])
 ... | bit_cursor [] (suc currentOffset) = nothing
+... | bit_cursor (_ ∷ _) (suc currentOffset) = nothing
 ... | bit_cursor currentCharacters@(headCharacter ∷ remainingCharacters) zero
   with decode_size currentCharacters
 ... | nothing = nothing
