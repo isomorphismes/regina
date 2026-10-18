@@ -42,6 +42,13 @@ The direct sum over all components is returned. An absent boundary therefore
 has trivial H₁. Invalid triangulations and boundary surfaces whose orientation
 or genus could not be classified return `nothing` rather than a group.
 
+## H₂ with mod-two coefficients
+
+`secondHomologyModTwoRank` translates Regina's `homologyH2Z2()` formula. It
+returns the free rank of relative H₁ plus the number of invariant factors
+divisible by two. The result is the number of Z/2 summands in H₂ with Z/2
+coefficients; failure of relative H₁ remains explicit.
+
 ## Reduction fixtures
 
 `Regina.RelativeBoundaryHomologyTests` checks:
@@ -49,7 +56,8 @@ or genus could not be classified return `nothing` rather than a group.
 - boundary H₁ for a 3-ball, 3-sphere, solid torus and figure-eight complement;
 - the nonorientable closed-surface formula;
 - relative H₁ for the same manifold fixtures and `RP2 x S1`;
-- the closed-manifold shortcut, empty triangulation, and invalid-input failure.
+- the closed-manifold shortcut, empty triangulation, and invalid-input failure;
+- mod-two H₂ ranks for the same manifold fixtures.
 
 The aggregate uses Agda safe mode, without K, builtins only. These reductions
 do not claim a fresh C++ differential run, a general equivalence proof between

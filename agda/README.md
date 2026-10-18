@@ -46,7 +46,7 @@ history moved with the repository transfer.
 | [`Regina.DualPresentation3`](Regina/DualPresentation3.agda) | First homology and raw fundamental-group presentations from the dual forest and exact internal-edge walks. |
 | [`Regina.PrimalBoundary`](Regina/PrimalBoundary.agda) | Dimension-generic primal boundary maps and quotient homology, including ideal vertices. |
 | [`Regina.DualBoundary3`](Regina/DualBoundary3.agda) | Three-dimensional dual boundary maps and H₀–H₃ of the truncated manifold. |
-| [`Regina.RelativeHomology3`](Regina/RelativeHomology3.agda), [`Regina.BoundaryHomology3`](Regina/BoundaryHomology3.agda) | Relative H₁ with real and ideal boundary, plus H₁ of classified boundary surfaces. |
+| [`Regina.RelativeHomology3`](Regina/RelativeHomology3.agda), [`Regina.BoundaryHomology3`](Regina/BoundaryHomology3.agda) | Relative H₁ with real and ideal boundary, H₁ of classified boundary surfaces, and mod-two H₂ rank. |
 | [`Regina.NormalCoordinates3`](Regina/NormalCoordinates3.agda), [`Regina.NormalMatching3`](Regina/NormalMatching3.agda) | Standard, quadrilateral, almost-normal and quad-octagon matching equations; local compatibility and enumeration admissibility. |
 | [`Regina.NormalSurface3`](Regina/NormalSurface3.agda) | Certified admissible vectors, edge weights, arc counts, and Euler characteristic from finite triangle coordinates. |
 | [`Regina.NormalVertices3`](Regina/NormalVertices3.agda), [`Regina.NormalFundamentals3`](Regina/NormalFundamentals3.agda) | Exact finite reference enumeration of primitive vertex rays and fundamental integral vectors; exhaustive algorithms rather than Regina's optimized enumeration engines. |
@@ -255,6 +255,9 @@ nonorientable genus `k` contributes `Z^(k-1) + Z/2`. See
 [`RELATIVE-BOUNDARY-HOMOLOGY.md`](RELATIVE-BOUNDARY-HOMOLOGY.md) for the exact
 representation choice and evidence boundary.
 
+`secondHomologyModTwoRank` also translates Regina's deduction of mod-two H₂:
+the free rank of relative H₁ plus its number of two-primary torsion factors.
+
 ## Exact boundary
 
 The current work still omits:
@@ -316,7 +319,7 @@ agda --safe --without-K --ignore-interfaces \
   -i agda agda/Regina/All.agda
 ```
 
-The aggregate checks **85 local modules and 479 concrete reduction
+The aggregate checks **85 local modules and 484 concrete reduction
 assertions**:
 
 - `Regina.PermutationTests`: 16;
@@ -345,7 +348,7 @@ assertions**:
 - `Regina.HomologyTests`: 14;
 - `Regina.PrimalBoundaryTests`: 10;
 - `Regina.DualBoundaryTests`: 8;
-- `Regina.RelativeBoundaryHomologyTests`: 15;
+- `Regina.RelativeBoundaryHomologyTests`: 20;
 - `Regina.NormalSurfaceTests`: 19;
 - `Regina.NormalVertexTests`: 6;
 - `Regina.NormalFundamentalTests`: 6.

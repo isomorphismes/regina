@@ -90,3 +90,26 @@ empty_relative_first_homology_is_trivial :
   relativeFirstHomology 1 (unpaired_simplices 3 0) ≡
     just (abelian_group 0 [])
 empty_relative_first_homology_is_trivial = refl
+
+ball_second_homology_mod_two_is_trivial :
+  secondHomologyModTwoRank 20 (ball 3) ≡ just 0
+ball_second_homology_mod_two_is_trivial = refl
+
+sphere_second_homology_mod_two_is_trivial :
+  map_outcome (secondHomologyModTwoRank 40) (sphere 3) ≡ accepted (just 0)
+sphere_second_homology_mod_two_is_trivial = refl
+
+solid_torus_second_homology_mod_two_is_trivial :
+  map_outcome (secondHomologyModTwoRank 40) three_dimensional_ball_bundle ≡
+    accepted (just 0)
+solid_torus_second_homology_mod_two_is_trivial = refl
+
+figure_eight_second_homology_mod_two_is_trivial :
+  map_outcome (secondHomologyModTwoRank 80) figure_eight_knot_complement ≡
+    accepted (just 0)
+figure_eight_second_homology_mod_two_is_trivial = refl
+
+projective_plane_times_circle_has_two_mod_two_two_cycles :
+  map_outcome (secondHomologyModTwoRank 60) projective_plane_times_circle ≡
+    accepted (just 2)
+projective_plane_times_circle_has_two_mod_two_two_cycles = refl

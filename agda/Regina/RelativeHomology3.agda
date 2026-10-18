@@ -121,3 +121,13 @@ relativeFirstHomology fuel currentTriangulation
 ... | true with nat_equal (Boundary.boundaryComponentCount currentTriangulation) zero
 ...   | true = Dual.firstHomology fuel currentTriangulation
 ...   | false = relativeFirstHomologyFromMaps fuel currentTriangulation
+
+-- Poincare-Lefschetz duality and the universal coefficient theorem give
+-- dim H2(M; Z2) from the free and two-primary parts of H1(M, boundary M).
+-- This is Regina's complete homologyH2Z2() calculation.
+secondHomologyModTwoRank : Nat → Triangulation 3 simplex_count → Maybe Nat
+secondHomologyModTwoRank fuel currentTriangulation
+  with relativeFirstHomology fuel currentTriangulation
+... | nothing = nothing
+... | just relativeGroup = just
+  (free_rank relativeGroup + torsionRank 2 relativeGroup)

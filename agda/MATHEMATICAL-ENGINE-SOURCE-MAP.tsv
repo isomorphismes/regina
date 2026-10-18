@@ -9,7 +9,7 @@ algebra/abeliangroup.cpp: matrix constructors	Regina.AbelianGroup/Regina.ChainHo
 triangulation/detail/algebra-impl.h: homology<1>,53-139; group,185-249	Regina.DualPresentation3	3D dual forest/ordered-edge relations; raw group presentation before Tietze simplification
 triangulation/detail/algebra-impl.h: boundaryMap,256-341	Regina.PrimalBoundary	Generic signed incidence with semantic local-face lookup; quotient includes ideal vertices
 triangulation/detail/algebra-impl.h: dualBoundaryMap,346-428	Regina.DualBoundary3	3D complementary orientation signs; omits real/ideal boundary faces; H0-H3 via certified chain homology
-triangulation/dim3/homology.cpp: homologyRel/homologyBdry,36-153	Regina.RelativeHomology3/Regina.BoundaryHomology3	Relative primal chain quotient for real and ideal boundary; classified-surface H1; total failure on invalid or unresolved input
+triangulation/dim3/homology.cpp: homologyRel/homologyBdry,36-153; triangulation3.h: homologyH2Z2,5224-5228	Regina.RelativeHomology3/Regina.BoundaryHomology3	Relative primal chain quotient for real and ideal boundary; classified-surface H1; mod-two H2 rank; total failure on invalid or unresolved input
 triangulation/example3.cpp: rp2xs1,53-69	Regina.Examples	Exact six source gluings; nonorientable torsion acceptance fixture
 surface/normalcoords.h; surface/normalsurface.h: quadSeparating/quadMeeting	Regina.NormalCoordinates3	Four finite coordinate encodings; typed quad lookup; local embeddedness and compatibility
 surface/matching.cpp: makeEmbeddedConstraints,39-70	Regina.NormalCoordinates3	Separate local quad/octagon and global octagon-support constraints
