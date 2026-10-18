@@ -92,11 +92,15 @@ systems and a cone whose Hilbert basis contains a point between vertex rays.
 The subsequent [2026-10-13 continuation](CORE-CONTINUATION-20261013.md)
 implements triangle reconstruction with spun/infinite coordinates, all four
 three-dimensional Pachner moves, and classical signatures and their reader.
+A later continuation reconstructs three-dimensional triangulations from
+printable second-generation signatures, including their bit stream, oriented
+permutation indices, locks, and disconnected components.
 Closed-cusp slope equations, surface topology and cutting/crushing remain
 untranslated. So do
 normal hypersurfaces, higher-dimensional links and recognition, relative
 homology, higher-dimensional truncated dual complexes, Tietze simplification,
-higher-dimensional Pachner moves, second-generation/binary signatures,
+higher-dimensional Pachner moves, second-generation canonical generation and
+binary signatures,
 geometric engines, broader serialization, GUI and bindings.
 The original source remains pinned to
 `e3a5c7c0e0581706d9e5531b750160b322489950`.

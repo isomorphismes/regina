@@ -6,7 +6,7 @@
 -- face quotient and embeddings, exact edge-link ordering, subface and
 -- tetrahedron-face mappings, face-link diagnostics, explicit vertex links,
 -- boundary structure and labels, per-face API properties, reasoned validity,
--- and all reduction tests.
+-- printable second-generation signatures, and all reduction tests.
 module Regina.All where
 
 import Regina.Foundation
@@ -90,3 +90,5 @@ import Regina.SignatureDecoding
 import Regina.DisjointUnion
 import Regina.ClassicalSignatureReader
 import Regina.ClassicalSignatureReaderTests
+import Regina.SecondGenerationSignature3
+import Regina.SecondGenerationSignatureTests
