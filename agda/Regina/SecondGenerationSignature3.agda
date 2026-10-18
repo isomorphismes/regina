@@ -191,30 +191,31 @@ open SecondGenerationData public
 
 decodeAfterDestinations : Nat → Bool → DestinationData →
   Maybe SecondGenerationData
-decodeAfterDestinations simplexCount oriented currentDestinations
-  with decode_bit_numbers (facet_bit_count currentDestinations) 1
-    (after_destinations currentDestinations)
+decodeAfterDestinations numberOfSimplices orientationFlag destinationPayload
+  with decode_bit_numbers (facet_bit_count destinationPayload) 1
+    (after_destinations destinationPayload)
 ... | nothing = nothing
-... | just facetResult with valid_join_count simplexCount currentDestinations
+... | just facetResult with valid_join_count numberOfSimplices destinationPayload
 ... | false = nothing
-... | true with decode_bit_numbers (join_count simplexCount currentDestinations)
-  (permutation_bit_width oriented) (remaining_bits facetResult)
+... | true with decode_bit_numbers (join_count numberOfSimplices destinationPayload)
+  (permutation_bit_width orientationFlag) (remaining_bits facetResult)
 ... | nothing = nothing
-... | just permutationResult = just (second_generation_payload oriented
+... | just permutationResult = just (second_generation_payload orientationFlag
   (reverse_list (bit_value facetResult))
-  (decoded_destinations currentDestinations)
-  (normalise_permutation_indices oriented (bit_value permutationResult))
+  (decoded_destinations destinationPayload)
+  (normalise_permutation_indices orientationFlag (bit_value permutationResult))
   (remaining_bits permutationResult))
 
 decodeAfterOrientation : Nat → Bool → BitCursor →
   Maybe SecondGenerationData
-decodeAfterOrientation simplexCount oriented currentCursor
-  with read_destinations (suc (4 * simplexCount)) (4 * simplexCount)
-    simplexCount (bits_required (suc simplexCount))
-    (2 * (simplexCount - 1)) zero currentCursor
+decodeAfterOrientation numberOfSimplices orientationFlag currentCursor
+  with read_destinations (suc (4 * numberOfSimplices))
+    (4 * numberOfSimplices) numberOfSimplices
+    (bits_required (suc numberOfSimplices))
+    (2 * (numberOfSimplices - 1)) zero currentCursor
 ... | nothing = nothing
 ... | just destinationResult =
-  decodeAfterDestinations simplexCount oriented destinationResult
+  decodeAfterDestinations numberOfSimplices orientationFlag destinationResult
 
 decode_component_bits : Nat → BitCursor → Maybe SecondGenerationData
 decode_component_bits simplexCount currentCursor
