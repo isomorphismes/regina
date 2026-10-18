@@ -189,9 +189,9 @@ record SecondGenerationData : Set where
     after_component_bits : BitCursor
 open SecondGenerationData public
 
-decode_after_destinations : Nat → Bool → DestinationData →
+decodeAfterDestinations : Nat → Bool → DestinationData →
   Maybe SecondGenerationData
-decode_after_destinations simplexCount oriented currentDestinations
+decodeAfterDestinations simplexCount oriented currentDestinations
   with decode_bit_numbers (facet_bit_count currentDestinations) 1
     (after_destinations currentDestinations)
 ... | nothing = nothing
@@ -206,15 +206,15 @@ decode_after_destinations simplexCount oriented currentDestinations
   (normalise_permutation_indices oriented (bit_value permutationResult))
   (remaining_bits permutationResult))
 
-decode_after_orientation : Nat → Bool → BitCursor →
+decodeAfterOrientation : Nat → Bool → BitCursor →
   Maybe SecondGenerationData
-decode_after_orientation simplexCount oriented currentCursor
+decodeAfterOrientation simplexCount oriented currentCursor
   with read_destinations (suc (4 * simplexCount)) (4 * simplexCount)
     simplexCount (bits_required (suc simplexCount))
     (2 * (simplexCount - 1)) zero currentCursor
 ... | nothing = nothing
 ... | just destinationResult =
-  decode_after_destinations simplexCount oriented destinationResult
+  decodeAfterDestinations simplexCount oriented destinationResult
 
 decode_component_bits : Nat → BitCursor → Maybe SecondGenerationData
 decode_component_bits simplexCount currentCursor
@@ -225,9 +225,9 @@ decode_component_bits simplexCount currentCursor
 ... | true with decode_bits 1 (remaining_bits markerResult)
 ... | nothing = nothing
 ... | just orientationResult with nat_equal (bit_value orientationResult) 1
-... | false = decode_after_orientation simplexCount false
+... | false = decodeAfterOrientation simplexCount false
   (remaining_bits orientationResult)
-... | true = decode_after_orientation simplexCount true
+... | true = decodeAfterOrientation simplexCount true
   (remaining_bits orientationResult)
 
 sn4_to_ordered_index : Nat → Nat
