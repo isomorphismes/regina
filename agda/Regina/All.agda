@@ -6,7 +6,7 @@
 -- face quotient and embeddings, exact edge-link ordering, subface and
 -- tetrahedron-face mappings, face-link diagnostics, explicit vertex links,
 -- boundary structure and labels, per-face API properties, reasoned validity,
--- and all reduction tests.
+-- relative and boundary homology, and all reduction tests.
 module Regina.All where
 
 import Regina.Foundation
@@ -69,6 +69,9 @@ import Regina.PrimalBoundary
 import Regina.PrimalBoundaryTests
 import Regina.DualBoundary3
 import Regina.DualBoundaryTests
+import Regina.BoundaryHomology3
+import Regina.RelativeHomology3
+import Regina.RelativeBoundaryHomologyTests
 import Regina.NormalCoordinates3
 import Regina.NormalMatching3
 import Regina.NormalSurface3
