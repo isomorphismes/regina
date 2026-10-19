@@ -56,6 +56,7 @@ history moved with the repository transfer.
 | [`Regina.Relabelling`](Regina/Relabelling.agda), [`Regina.DisjointUnion`](Regina/DisjointUnion.agda) | Dimension-indexed simplex/vertex relabellings, inverses/composition, and component union with transported locks. |
 | [`Regina.SignatureEncoding`](Regina/SignatureEncoding.agda), [`Regina.SignatureDecoding`](Regina/SignatureDecoding.agda) | Regina base64 characters, little-endian integers, facet trits, and classical signature parsing. |
 | [`Regina.IsomorphismSignature`](Regina/IsomorphismSignature.agda), [`Regina.ClassicalSignatureReader`](Regina/ClassicalSignatureReader.agda) | All-dimensional classical signature minimisation and reconstruction, including locks and disconnected components. |
+| [`Regina.SecondGenerationSignature3`](Regina/SecondGenerationSignature3.agda) | Three-dimensional printable second-generation signature reconstruction, including bit packing, oriented permutation indices, locks, and disconnected components. |
 
 Source maps:
 
@@ -74,6 +75,7 @@ Source maps:
 - [`TRIANGLE-TYPES3-SOURCE-MAP.tsv`](TRIANGLE-TYPES3-SOURCE-MAP.tsv): triangle type, subtype, cone, and Möbius-band recognition.
 - [`FACET-OPERATIONS3-SOURCE-MAP.tsv`](FACET-OPERATIONS3-SOURCE-MAP.tsv): permutation extension and face-level gluing and locks.
 - [`MATHEMATICAL-ENGINE-SOURCE-MAP.tsv`](MATHEMATICAL-ENGINE-SOURCE-MAP.tsv): boundary/link construction, integer algebra, chain maps, and normal-surface machinery.
+- [`SECOND-GENERATION-SIGNATURE3-SOURCE-MAP.tsv`](SECOND-GENERATION-SIGNATURE3-SOURCE-MAP.tsv): printable second-generation bit streams and three-dimensional reconstruction.
 - [`RELATIVE-BOUNDARY-HOMOLOGY-SOURCE-MAP.tsv`](RELATIVE-BOUNDARY-HOMOLOGY-SOURCE-MAP.tsv): relative and boundary first homology.
 
 ## Certified gluing core
@@ -268,7 +270,7 @@ The current work still omits:
 - Regina's packed `Perm<3>` serialization for link-triangle side gluings;
 - mutable C++ objects, pointer identity, caches, invalidation, and notification behavior;
 - closed-cusp slope equations, cutting/crushing, normal-surface topology, and normal hypersurfaces;
-- higher-dimensional truncated dual complexes, fundamental-group Tietze simplification, higher-dimensional Pachner moves, general recognition, second-generation/binary signatures, geometry, GUI code, and native bindings.
+- higher-dimensional truncated dual complexes, fundamental-group Tietze simplification, higher-dimensional Pachner moves, general recognition, second-generation canonical generation and binary signatures, geometry, GUI code, and native bindings.
 
 The source-shaped validity, face-property, triangle-type, subface,
 tetrahedron-face, and exact edge-order reports are specific to dimension three.
@@ -319,7 +321,7 @@ agda --safe --without-K --ignore-interfaces \
   -i agda agda/Regina/All.agda
 ```
 
-The aggregate checks **85 local modules and 484 concrete reduction
+The aggregate checks **87 local modules and 512 concrete reduction
 assertions**:
 
 - `Regina.PermutationTests`: 16;
@@ -356,6 +358,7 @@ assertions**:
 - `Regina.PachnerTests`: 20;
 - `Regina.IsomorphismSignatureTests`: 22;
 - `Regina.ClassicalSignatureReaderTests`: 30.
+- `Regina.SecondGenerationSignatureTests`: 28.
 
 See [`VERIFICATION.txt`](VERIFICATION.txt) for the earlier branch run and
 [`TRIANGLE-TYPES3-VERIFICATION.txt`](TRIANGLE-TYPES3-VERIFICATION.txt) for the
@@ -381,7 +384,8 @@ semantics. The exhaustive normal-surface enumeration algorithms are Agda
 reference implementations of the mathematical output, not copies of Regina's
 optimized implementations. Thank you to
 Ben Burton for triangle reconstruction, Pachner transitions, relabellings,
-signature discovery, and signature encodings and readers. Signature root
+signature discovery, and classical and second-generation signature encodings
+and readers. Signature root
 permutation enumeration is exhaustive reference code; Regina's pruning and
 packed representations are not claimed. Thank you to
 **Ryan Budney** and **William Pettersson** for their work on Regina. Thank you to
