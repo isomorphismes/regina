@@ -46,6 +46,7 @@ history moved with the repository transfer.
 | [`Regina.DualPresentation3`](Regina/DualPresentation3.agda) | First homology and raw fundamental-group presentations from the dual forest and exact internal-edge walks. |
 | [`Regina.PrimalBoundary`](Regina/PrimalBoundary.agda) | Dimension-generic primal boundary maps and quotient homology, including ideal vertices. |
 | [`Regina.DualBoundary3`](Regina/DualBoundary3.agda) | Three-dimensional dual boundary maps and H₀–H₃ of the truncated manifold. |
+| [`Regina.RelativeHomology3`](Regina/RelativeHomology3.agda), [`Regina.BoundaryHomology3`](Regina/BoundaryHomology3.agda) | Relative H₁ with real and ideal boundary, H₁ of classified boundary surfaces, and mod-two H₂ rank. |
 | [`Regina.NormalCoordinates3`](Regina/NormalCoordinates3.agda), [`Regina.NormalMatching3`](Regina/NormalMatching3.agda) | Standard, quadrilateral, almost-normal and quad-octagon matching equations; local compatibility and enumeration admissibility. |
 | [`Regina.NormalSurface3`](Regina/NormalSurface3.agda) | Certified admissible vectors, edge weights, arc counts, and Euler characteristic from finite triangle coordinates. |
 | [`Regina.NormalVertices3`](Regina/NormalVertices3.agda), [`Regina.NormalFundamentals3`](Regina/NormalFundamentals3.agda) | Exact finite reference enumeration of primitive vertex rays and fundamental integral vectors; exhaustive algorithms rather than Regina's optimized enumeration engines. |
@@ -75,6 +76,7 @@ Source maps:
 - [`FACET-OPERATIONS3-SOURCE-MAP.tsv`](FACET-OPERATIONS3-SOURCE-MAP.tsv): permutation extension and face-level gluing and locks.
 - [`MATHEMATICAL-ENGINE-SOURCE-MAP.tsv`](MATHEMATICAL-ENGINE-SOURCE-MAP.tsv): boundary/link construction, integer algebra, chain maps, and normal-surface machinery.
 - [`SECOND-GENERATION-SIGNATURE3-SOURCE-MAP.tsv`](SECOND-GENERATION-SIGNATURE3-SOURCE-MAP.tsv): printable second-generation bit streams and three-dimensional reconstruction.
+- [`RELATIVE-BOUNDARY-HOMOLOGY-SOURCE-MAP.tsv`](RELATIVE-BOUNDARY-HOMOLOGY-SOURCE-MAP.tsv): relative and boundary first homology.
 
 ## Certified gluing core
 
@@ -241,6 +243,23 @@ fields. The report independently records whether exact edge order, tetrahedron
 face tables, explicit vertex links, and real-boundary orientation assignments
 all completed.
 
+## Relative and boundary homology
+
+`Regina.RelativeHomology3` computes H₁ relative to all real and ideal boundary
+components. Boundary cells and ideal vertices are removed from the primal
+chain groups, and the resulting pair of matrices passes through the existing
+checked chain-homology and Smith-form code. Invalid triangulations fail, while
+boundary-free triangulations follow Regina's shortcut to ordinary H₁.
+
+`Regina.BoundaryHomology3` sums the first homology of every classified real or
+ideal boundary surface. Orientable genus `g` contributes `Z^(2g)`;
+nonorientable genus `k` contributes `Z^(k-1) + Z/2`. See
+[`RELATIVE-BOUNDARY-HOMOLOGY.md`](RELATIVE-BOUNDARY-HOMOLOGY.md) for the exact
+representation choice and evidence boundary.
+
+`secondHomologyModTwoRank` also translates Regina's deduction of mod-two H₂:
+the free rank of relative H₁ plus its number of two-primary torsion factors.
+
 ## Exact boundary
 
 The current work still omits:
@@ -251,7 +270,7 @@ The current work still omits:
 - Regina's packed `Perm<3>` serialization for link-triangle side gluings;
 - mutable C++ objects, pointer identity, caches, invalidation, and notification behavior;
 - closed-cusp slope equations, cutting/crushing, normal-surface topology, and normal hypersurfaces;
-- relative homology, higher-dimensional truncated dual complexes, fundamental-group Tietze simplification, higher-dimensional Pachner moves, general recognition, second-generation canonical generation and binary signatures, geometry, GUI code, and native bindings.
+- higher-dimensional truncated dual complexes, fundamental-group Tietze simplification, higher-dimensional Pachner moves, general recognition, second-generation canonical generation and binary signatures, geometry, GUI code, and native bindings.
 
 The source-shaped validity, face-property, triangle-type, subface,
 tetrahedron-face, and exact edge-order reports are specific to dimension three.
@@ -302,7 +321,7 @@ agda --safe --without-K --ignore-interfaces \
   -i agda agda/Regina/All.agda
 ```
 
-The aggregate checks **84 local modules and 492 concrete reduction
+The aggregate checks **87 local modules and 512 concrete reduction
 assertions**:
 
 - `Regina.PermutationTests`: 16;
@@ -331,6 +350,7 @@ assertions**:
 - `Regina.HomologyTests`: 14;
 - `Regina.PrimalBoundaryTests`: 10;
 - `Regina.DualBoundaryTests`: 8;
+- `Regina.RelativeBoundaryHomologyTests`: 20;
 - `Regina.NormalSurfaceTests`: 19;
 - `Regina.NormalVertexTests`: 6;
 - `Regina.NormalFundamentalTests`: 6.

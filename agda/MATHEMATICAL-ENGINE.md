@@ -96,9 +96,10 @@ A later continuation reconstructs three-dimensional triangulations from
 printable second-generation signatures, including their bit stream, oriented
 permutation indices, locks, and disconnected components.
 Closed-cusp slope equations, surface topology and cutting/crushing remain
-untranslated. So do
-normal hypersurfaces, higher-dimensional links and recognition, relative
-homology, higher-dimensional truncated dual complexes, Tietze simplification,
+untranslated. A later continuation implements relative and boundary first
+homology in dimension three. Still untranslated are normal hypersurfaces,
+higher-dimensional links and recognition, higher-dimensional truncated dual
+complexes, Tietze simplification,
 higher-dimensional Pachner moves, second-generation canonical generation and
 binary signatures,
 geometric engines, broader serialization, GUI and bindings.
